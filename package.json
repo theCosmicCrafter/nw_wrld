@@ -7,7 +7,11 @@
   "scripts": {
     "start": "concurrently -k \"npm run serve\" \"wait-on http://localhost:9000 && electron src\"",
     "serve": "webpack serve --mode development",
-    "build": "webpack --mode production"
+    "build": "webpack --mode production",
+    "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true});require('fs').rmSync('release',{recursive:true,force:true});\"",
+    "build:renderer": "npm run clean && webpack --mode production",
+    "pack:mac": "npm run build:renderer && electron-builder --mac --dir",
+    "dist:mac": "npm run build:renderer && electron-builder --mac"
   },
   "engines": {
     "node": "^18.0.0"
@@ -65,6 +69,7 @@
     "copy-webpack-plugin": "^13.0.1",
     "css-loader": "^6.10.0",
     "electron": "^39.2.7",
+    "electron-builder": "^25.1.8",
     "monaco-editor": "^0.55.1",
     "monaco-editor-webpack-plugin": "^7.1.1",
     "postcss": "^8.4.38",
@@ -77,5 +82,26 @@
     "webpack": "^5.89.0",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.2.2"
+  },
+  "build": {
+    "appId": "tech.aagentah.nw_wrld",
+    "productName": "nw_wrld",
+    "asar": true,
+    "npmRebuild": false,
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "index.js",
+      "package.json",
+      "node_modules/**",
+      "dist/**",
+      "src/**"
+    ],
+    "mac": {
+      "target": [
+        "dmg"
+      ]
+    }
   }
 }

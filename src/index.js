@@ -445,7 +445,9 @@ function createWindow(projectDir) {
     projector1Window.show();
   });
 
-  projector1Window.loadFile("projector/views/projector.html");
+  projector1Window.loadFile(
+    path.join(__dirname, "projector", "views", "projector.html")
+  );
 
   // Create Dashboard Window with appropriate optimizations
   dashboardWindow = new BrowserWindow({
@@ -469,7 +471,9 @@ function createWindow(projectDir) {
     dashboardWindow.show();
   });
 
-  dashboardWindow.loadFile("dashboard/views/dashboard.html");
+  dashboardWindow.loadFile(
+    path.join(__dirname, "dashboard", "views", "dashboard.html")
+  );
 
   dashboardWindow.webContents.once("did-finish-load", () => {
     const fullConfig = loadConfig(projectDir);

@@ -1,12 +1,17 @@
 # Dependencies
 node_modules/
-package-lock.json
+# package-lock.json
 
 # Build outputs
 dist/
 build/
 out/
 src/shared/json/*.json
+
+# Packaged app artifacts (generated)
+release/
+*.dmg
+*.dmg.blockmap
 
 # Logs
 logs/
