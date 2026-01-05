@@ -329,13 +329,13 @@ Once you're comfortable with the sequencer, you can connect external hardware fo
 - Check that the file is saved in your project's `modules/` folder
 - Verify the file has `export default ClassName` at the end
 - Check the console for syntax errors
-- Verify `static name = "ModuleName"` matches the class name
+- Verify the file starts with a docblock that includes `@nwWrld name`, `@nwWrld category`, and `@nwWrld imports`
 
 **Module appears but won't load:**
 
 - Open Developer Console (Cmd+Option+I on Mac) in the Projector window
 - Check for JavaScript errors
-- Verify you're using `globalThis.nwWrldSdk` for imports
+- Verify your `@nwWrld imports` includes everything you use (e.g. `ModuleBase`, `assetUrl`, `loadJson`, `THREE`, `p5`, `d3`)
 - Check that all required methods are defined
 
 **Changes not reloading:**
@@ -411,7 +411,7 @@ Read the [Module Development Guide](MODULE_DEVELOPMENT.md) to learn:
 
 - Module structure and lifecycle
 - Creating custom methods
-- Using the nwWrldSdk for asset loading
+- Loading project assets with `assetUrl`, `loadJson`, and `readText`
 - Working with p5.js, Three.js, and D3.js
 - Best practices and performance tips
 

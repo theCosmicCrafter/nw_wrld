@@ -10,7 +10,7 @@ This guide covers creating custom visual modules for nw_wrld, including the work
 4. [Module Lifecycle](#module-lifecycle)
 5. [Working with Methods](#working-with-methods)
 6. [Option Types Reference](#option-types-reference)
-7. [nwWrldSdk API Reference](#nwwrldsdk-api-reference)
+7. [SDK API Reference](#sdk-api-reference)
 8. [Working with Assets](#working-with-assets)
 9. [Using Libraries](#using-libraries)
 10. [Starter Modules Reference](#starter-modules-reference)
@@ -116,13 +116,13 @@ Let's create a simple pulsing circle module in your workspace.
 Navigate to your project folder and create `modules/PulsingCircle.js`:
 
 ```javascript
-const { ModuleBase } = globalThis.nwWrldSdk || {};
+/*
+@nwWrld name: PulsingCircle
+@nwWrld category: 2D
+@nwWrld imports: ModuleBase
+*/
 
 class PulsingCircle extends ModuleBase {
-  // Module metadata
-  static name = "PulsingCircle";
-  static category = "2D"; // Use "2D", "3D", or "Text"
-
   // Define available methods
   static methods = [
     ...ModuleBase.methods, // Inherit base methods
@@ -373,11 +373,11 @@ All options create UI controls in the Dashboard and pass values to your methods.
 
 ---
 
-## nwWrldSdk API Reference
+## SDK API Reference
 
 nw_wrld injects the identifiers you request in `@nwWrld imports` so your module code can use them directly (`ModuleBase`, `assetUrl`, `THREE`, etc.).
 
-Internally, these map to `globalThis.nwWrldSdk` (SDK helpers) and `globalThis.THREE/p5/d3` (libraries).
+Internally, these are provided by the runtime; libraries are available as `globalThis.THREE/p5/d3`.
 
 ### Accessing the SDK
 
@@ -397,14 +397,15 @@ Internally, these map to `globalThis.nwWrldSdk` (SDK helpers) and `globalThis.TH
 The foundation for all 2D and DOM-based modules.
 
 ```javascript
-const { ModuleBase } = globalThis.nwWrldSdk || {};
+/*
+@nwWrld name: MyModule
+@nwWrld category: 2D
+@nwWrld imports: ModuleBase
+*/
 
 class MyModule extends ModuleBase {
-  static name = "MyModule";
-  static category = "2D";
-
   static methods = [
-    ...((ModuleBase && ModuleBase.methods) || []),
+    ...ModuleBase.methods,
     // your methods
   ];
 
@@ -437,15 +438,15 @@ class MyModule extends ModuleBase {
 Base class for Three.js 3D modules (extends ModuleBase).
 
 ```javascript
-const { BaseThreeJsModule } = globalThis.nwWrldSdk || {};
-const THREE = globalThis.THREE;
+/*
+@nwWrld name: My3DModule
+@nwWrld category: 3D
+@nwWrld imports: BaseThreeJsModule, THREE
+*/
 
 class My3DModule extends BaseThreeJsModule {
-  static name = "My3DModule";
-  static category = "3D";
-
   static methods = [
-    ...((BaseThreeJsModule && BaseThreeJsModule.methods) || []),
+    ...BaseThreeJsModule.methods,
     // your methods
   ];
 
@@ -476,7 +477,7 @@ class My3DModule extends BaseThreeJsModule {
 
 #### assetUrl(path)
 
-Get a `file://` URL for a workspace asset.
+Get a `nw-assets://` URL for a workspace asset (scoped to the current project).
 
 ```javascript
 const imageUrl = assetUrl("images/blueprint.png");
@@ -489,7 +490,7 @@ if (imageUrl) {
 
 - `path` (string) - Relative path from `assets/` folder
 
-**Returns:** `string | null` - File URL or null if invalid
+**Returns:** `string | null` - Asset URL or null if invalid
 
 **Path safety:** Paths are constrained to the `assets/` folder. Attempts to access files outside the project assets will return null.
 
@@ -514,7 +515,7 @@ if (data) {
 
 ```javascript
 async loadData() {
-  const data = await nwWrldSdk.loadJson('json/data.json');
+  const data = await loadJson("json/data.json");
   if (data && Array.isArray(data)) {
     this.dataset = data;
   } else {
@@ -541,28 +542,13 @@ if (text) {
 
 **Returns:** `Promise<string | null>` - File contents or null if error
 
-#### getWorkspaceDir()
-
-Get the absolute path to the current workspace folder.
-
-```javascript
-const workspaceDir = globalThis.nwWrldSdk?.getWorkspaceDir?.();
-console.log("Working in:", workspaceDir);
-// Example: /Users/yourname/MyProject
-```
-
-**Returns:** `string | null` - Absolute path or null if no workspace
-
-**Note:** You typically don't need this for asset loading (use `assetUrl`, `loadJson`, `readText` instead). Useful for debugging or logging.
-
 ### SDK Method Summary
 
-| Method              | Purpose                   | Returns                   |
-| ------------------- | ------------------------- | ------------------------- |
-| `assetUrl(path)`    | Get file:// URL for asset | `string \| null`          |
-| `loadJson(path)`    | Load & parse JSON file    | `Promise<object \| null>` |
-| `readText(path)`    | Read text file            | `Promise<string \| null>` |
-| `getWorkspaceDir()` | Get workspace path        | `string \| null`          |
+| Method           | Purpose                          | Returns                   |
+| ---------------- | -------------------------------- | ------------------------- |
+| `assetUrl(path)` | Get `nw-assets://` URL for asset | `string \| null`          |
+| `loadJson(path)` | Load & parse JSON file           | `Promise<object \| null>` |
+| `readText(path)` | Read text file                   | `Promise<string \| null>` |
 
 ---
 
@@ -591,14 +577,15 @@ MyProject/
 ### Loading Images
 
 ```javascript
-const { ModuleBase } = globalThis.nwWrldSdk || {};
+/*
+@nwWrld name: ImageModule
+@nwWrld category: 2D
+@nwWrld imports: ModuleBase, assetUrl
+*/
 
 class ImageModule extends ModuleBase {
-  static name = "ImageModule";
-  static category = "2D";
-
   static methods = [
-    ...((ModuleBase && ModuleBase.methods) || []),
+    ...ModuleBase.methods,
     {
       name: "setImage",
       executeOnLoad: true,
@@ -625,7 +612,7 @@ class ImageModule extends ModuleBase {
   }
 
   setImage({ path = "images/blueprint.png" } = {}) {
-    const url = nwWrldSdk.assetUrl(path);
+    const url = assetUrl(path);
     if (this.img && url) {
       this.img.src = url;
     }
@@ -647,14 +634,15 @@ export default ImageModule;
 ### Loading JSON Data
 
 ```javascript
-const { ModuleBase } = globalThis.nwWrldSdk || {};
+/*
+@nwWrld name: DataViz
+@nwWrld category: 2D
+@nwWrld imports: ModuleBase, loadJson
+*/
 
 class DataViz extends ModuleBase {
-  static name = "DataViz";
-  static category = "2D";
-
   static methods = [
-    ...((ModuleBase && ModuleBase.methods) || []),
+    ...ModuleBase.methods,
     {
       name: "loadData",
       executeOnLoad: true,
@@ -680,7 +668,7 @@ class DataViz extends ModuleBase {
 
   async loadData({ count = 5 } = {}) {
     // Try to load from workspace
-    const data = await nwWrldSdk.loadJson("json/meteor.json");
+    const data = await loadJson("json/meteor.json");
 
     if (data && Array.isArray(data)) {
       // Use workspace data
@@ -712,7 +700,7 @@ export default DataViz;
 
 ```javascript
 async loadPoem() {
-  const text = await nwWrldSdk.readText('data/poem.txt');
+  const text = await readText("data/poem.txt");
   if (text) {
     this.displayText(text);
   } else {
@@ -726,17 +714,17 @@ async loadPoem() {
 ✅ **Correct:**
 
 ```javascript
-nwWrldSdk.assetUrl("images/photo.png");
-nwWrldSdk.loadJson("json/data.json");
-nwWrldSdk.readText("data/text.txt");
+assetUrl("images/photo.png");
+loadJson("json/data.json");
+readText("data/text.txt");
 ```
 
 ❌ **Incorrect:**
 
 ```javascript
-nwWrldSdk.assetUrl("/images/photo.png"); // Don't start with /
-nwWrldSdk.assetUrl("../other/file.png"); // Can't escape assets folder
-nwWrldSdk.assetUrl("/etc/passwd"); // Path safety: constrained to assets/
+assetUrl("/images/photo.png"); // Don't start with /
+assetUrl("../other/file.png"); // Can't escape assets folder
+assetUrl("/etc/passwd"); // Path safety: constrained to assets/
 ```
 
 ### Starter Assets
@@ -757,14 +745,14 @@ Study the **Image** and **AsteroidGraph** starter modules to see asset loading p
 p5.js is available globally in workspace modules.
 
 ```javascript
-const { ModuleBase } = globalThis.nwWrldSdk || {};
-const p5 = globalThis.p5;
+/*
+@nwWrld name: MyP5Module
+@nwWrld category: 2D
+@nwWrld imports: ModuleBase, p5
+*/
 
 class MyP5Module extends ModuleBase {
-  static name = "MyP5Module";
-  static category = "2D";
-
-  static methods = [...((ModuleBase && ModuleBase.methods) || [])];
+  static methods = [...ModuleBase.methods];
 
   constructor(container) {
     super(container);
@@ -810,15 +798,14 @@ See the **GridDots** and **AsteroidGraph** starter modules for complete p5.js ex
 Extend `BaseThreeJsModule` instead of `ModuleBase` for Three.js projects.
 
 ```javascript
-const { BaseThreeJsModule } = globalThis.nwWrldSdk || {};
+/*
+@nwWrld name: My3DModule
+@nwWrld category: 3D
+@nwWrld imports: BaseThreeJsModule, THREE
+*/
 
 class My3DModule extends BaseThreeJsModule {
-  static name = "My3DModule";
-  static category = "3D";
-
-  static methods = [
-    ...((BaseThreeJsModule && BaseThreeJsModule.methods) || []),
-  ];
+  static methods = [...BaseThreeJsModule.methods];
 
   constructor(container) {
     super(container);
@@ -864,14 +851,14 @@ See the **SpinningCube**, **CubeCube**, and **OrbitalPlane** starter modules for
 D3.js is available globally in workspace modules.
 
 ```javascript
-const { ModuleBase } = globalThis.nwWrldSdk || {};
-const d3 = globalThis.d3;
+/*
+@nwWrld name: MyD3Module
+@nwWrld category: 2D
+@nwWrld imports: ModuleBase, d3
+*/
 
 class MyD3Module extends ModuleBase {
-  static name = "MyD3Module";
-  static category = "2D";
-
-  static methods = [...((ModuleBase && ModuleBase.methods) || [])];
+  static methods = [...ModuleBase.methods];
 
   constructor(container) {
     super(container);
@@ -974,7 +961,7 @@ Every new project includes 16 starter modules that demonstrate different techniq
 
 **File:** `modules/Image.js`  
 **Purpose:** Load and display images from workspace assets  
-**Techniques:** `nwWrldSdk.assetUrl()`, image loading  
+**Techniques:** `assetUrl()`, image loading  
 **Good for:** Learning asset loading patterns
 
 #### CodeColumns
@@ -1020,7 +1007,7 @@ Every new project includes 16 starter modules that demonstrate different techniq
 
 **File:** `modules/AsteroidGraph.js`  
 **Purpose:** p5.js visualization with workspace JSON data  
-**Techniques:** `nwWrldSdk.loadJson()`, data processing, p5.js graphs  
+**Techniques:** `loadJson()`, data processing, p5.js graphs  
 **Good for:** Learning asset loading and data visualization
 
 #### MathOrbitalMap
@@ -1138,7 +1125,7 @@ init() {
 
 async loadAssets() {
   try {
-    this.dataset = await nwWrldSdk.loadJson('json/data.json');
+    this.dataset = await loadJson("json/data.json");
     if (this.dataset) {
       this.render();
     }
@@ -1252,15 +1239,15 @@ When you save a module file, watch the Dashboard for feedback:
 
 ### Common Errors
 
-| Error                                        | Cause                 | Fix                                                                     |
-| -------------------------------------------- | --------------------- | ----------------------------------------------------------------------- |
-| "Module does not have an 'elem' property"    | Forgot `super()`      | Call `super(container)` first in constructor                            |
-| "Cannot read property 'appendChild' of null" | `this.elem` not ready | Ensure `super()` is called before accessing `this.elem`                 |
-| "Method not found"                           | Name mismatch         | Method name in `static methods` must match function name exactly        |
-| "Module doesn't appear in Dashboard"         | Export/name issues    | Add `export default ModuleName` and verify `static name = "ModuleName"` |
-| "ModuleBase is not defined"                  | Missing SDK import    | Add `const { ModuleBase } = globalThis.nwWrldSdk \|\| {};` at top       |
-| "Asset failed to load"                       | Invalid path          | Verify path is relative to `assets/` folder, no leading `/`             |
-| "Module loads but nothing visible"           | Module hidden         | Call `this.show()` or set a method with `executeOnLoad: true`           |
+| Error                                        | Cause                 | Fix                                                                                     |
+| -------------------------------------------- | --------------------- | --------------------------------------------------------------------------------------- |
+| "Module does not have an 'elem' property"    | Forgot `super()`      | Call `super(container)` first in constructor                                            |
+| "Cannot read property 'appendChild' of null" | `this.elem` not ready | Ensure `super()` is called before accessing `this.elem`                                 |
+| "Method not found"                           | Name mismatch         | Method name in `static methods` must match function name exactly                        |
+| "Module doesn't appear in Dashboard"         | Contract issues       | Ensure docblock has `@nwWrld name/category/imports` and file ends with `export default` |
+| "ModuleBase is not defined"                  | Missing import        | Add `ModuleBase` to `@nwWrld imports`                                                   |
+| "Asset failed to load"                       | Invalid path          | Verify path is relative to `assets/` folder, no leading `/`                             |
+| "Module loads but nothing visible"           | Module hidden         | Call `this.show()` or set a method with `executeOnLoad: true`                           |
 
 ### Checking Module Loading
 
@@ -1284,12 +1271,10 @@ To debug asset loading issues:
 
 ```javascript
 async testAssetLoading() {
-  console.log('Workspace dir:', nwWrldSdk.getWorkspaceDir());
-
-  const imageUrl = nwWrldSdk.assetUrl('images/test.png');
+  const imageUrl = assetUrl("images/test.png");
   console.log('Image URL:', imageUrl);
 
-  const data = await nwWrldSdk.loadJson('json/data.json');
+  const data = await loadJson("json/data.json");
   console.log('Loaded data:', data);
 }
 ```
@@ -1307,10 +1292,14 @@ async testAssetLoading() {
 
 ### Module Structure
 
-1. **Always use the SDK pattern** at the top of workspace modules:
+1. **Use docblock imports** and rely on the injected identifiers:
 
    ```javascript
-   const { ModuleBase } = globalThis.nwWrldSdk || {};
+   /*
+   @nwWrld name: MyModule
+   @nwWrld category: 2D
+   @nwWrld imports: ModuleBase
+   */
    ```
 
 2. **Always call `super(container)` first** in constructor:
@@ -1324,8 +1313,8 @@ async testAssetLoading() {
    ```
 
 3. **Use descriptive names**:
-   - Module name: `static name = "MyDescriptiveModule"`
-   - Category: `"2D"`, `"3D"`, or `"Text"`
+   - Display name: `@nwWrld name: ...`
+   - Category: `@nwWrld category: ...`
    - Method names: Clear, action-oriented (`loadData`, `setColor`, `animate`)
 
 ### Method Design
@@ -1356,7 +1345,7 @@ async testAssetLoading() {
 1. **Always check for null returns**:
 
    ```javascript
-   const data = await nwWrldSdk.loadJson("json/data.json");
+   const data = await loadJson("json/data.json");
    if (data && Array.isArray(data)) {
      // Use data
    } else {
@@ -1368,7 +1357,7 @@ async testAssetLoading() {
 
    ```javascript
    async loadData() {
-     const data = await nwWrldSdk.loadJson('json/data.json');
+     const data = await loadJson("json/data.json");
      this.dataset = data || this.generateDefaultData();
    }
    ```
@@ -1628,7 +1617,7 @@ async testAssetLoading() {
    ```javascript
    async init() {
      // Load once during init
-     this.dataset = await nwWrldSdk.loadJson('json/data.json');
+     this.dataset = await loadJson("json/data.json");
    }
 
    myMethod() {

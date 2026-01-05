@@ -17,5 +17,3 @@ contextBridge.exposeInMainWorld("nwSandboxIpc", {
     };
   },
 });
-
-
