@@ -9,6 +9,20 @@ Visuals can be triggered via the built-in 16-step sequencer or by configuring ex
 
 ---
 
+## Beta Notice
+
+This project is currently in beta. Downloadable installers are not currently provided; run `nw_wrld` from source using this repository.
+
+## Roadmap
+
+- [x] Isolated sandbox and module-workspace bundling
+- [x] Docblock-declared module dependencies with automated runtime injection
+- [ ] Signed and notarized macOS builds + signed Windows builds for frictionless installs
+- [ ] Userdata and module versioning (plus migration scripts)
+- [ ] Multi-band audio threshold analysis (local processing) for channel triggers
+- [ ] Remote API input source with HTTP/WebSocket client for cloud-based services (audio analysis APIs, ML models, etc.)
+- [ ] Serial port input support for hardware sensor integration
+
 ## Features
 
 - **Built-in 16-step pattern sequencer** - Create rhythmic audiovisual compositions without external hardware
@@ -21,17 +35,6 @@ Visuals can be triggered via the built-in 16-step sequencer or by configuring ex
 ---
 
 ## Installation
-
-### For Users (Recommended)
-
-Download and install the DMG from [Releases](https://github.com/aagentah/nw_wrld/releases)
-
-1. Open the DMG and drag nw_wrld to Applications
-2. Launch nw_wrld
-3. Select a folder for your project (or create a new one)
-4. Start creating immediately with 16 included starter modules
-
-**No Node.js, terminal, or coding experience required to get started.**
 
 ### For Developers
 
