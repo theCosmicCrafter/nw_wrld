@@ -6,7 +6,6 @@
 
 class MathOrbitalMap extends ModuleBase {
   static methods = [
-    ...((ModuleBase && ModuleBase.methods) || []),
     {
       name: "randomize",
       executeOnLoad: false,

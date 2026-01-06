@@ -6,7 +6,6 @@
 
 class ZKProofVisualizer extends ModuleBase {
   static methods = [
-    ...((ModuleBase && ModuleBase.methods) || []),
     {
       name: "match",
       executeOnLoad: false,

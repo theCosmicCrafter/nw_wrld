@@ -47,7 +47,6 @@ const valueNoise2 = (x, y, seed) => valueNoise3(x, y, 0, seed);
 
 class CloudPointIceberg extends BaseThreeJsModule {
   static methods = [
-    ...((BaseThreeJsModule && BaseThreeJsModule.methods) || []),
     {
       name: "randomizeColour",
     },

@@ -27,7 +27,6 @@ class CodeColumns extends ModuleBase {
         },
       ],
     },
-    ...((ModuleBase && ModuleBase.methods) || []),
   ];
 
   constructor(container) {

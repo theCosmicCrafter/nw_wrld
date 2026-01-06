@@ -436,7 +436,10 @@ export const MethodBlock = React.memo(
             }`}
           >
             {methodOptions?.map((option) => {
-              const currentOption = method.options.find(
+              const methodOptionValues = Array.isArray(method?.options)
+                ? method.options
+                : [];
+              const currentOption = methodOptionValues.find(
                 (o) => o.name === option.name
               );
 

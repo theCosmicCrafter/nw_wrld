@@ -64,6 +64,22 @@ class TrackSandboxHost {
     });
   }
 
+  setMatrixForInstance({
+    instanceId,
+    track,
+    moduleSources,
+    assetsBaseUrl,
+    matrixOptions,
+  }) {
+    return this.request("setMatrixForInstance", {
+      instanceId,
+      track,
+      moduleSources,
+      assetsBaseUrl,
+      matrixOptions,
+    });
+  }
+
   invokeOnInstance(instanceId, methodName, options) {
     return this.request("invokeOnInstance", {
       instanceId,
@@ -96,6 +112,7 @@ const Projector = {
   moduleClassCache: new Map(),
   workspaceModuleSourceCache: new Map(),
   methodOptionNoRepeatCache: new Map(),
+  runtimeMatrixOverrides: new Map(),
   assetsBaseUrl: null,
   trackSandboxHost: null,
   trackModuleSources: null,
@@ -756,6 +773,9 @@ const Projector = {
     this.activeModules = {};
     this.activeTrack = null;
     this.activeChannelHandlers = {};
+    try {
+      this.runtimeMatrixOverrides = new Map();
+    } catch {}
     this.isDeactivating = false;
   },
 
@@ -999,33 +1019,83 @@ const Projector = {
         return;
       }
 
+      const matrixOverridesForChannel = new Map(); // instanceId -> matrixOptions
+      const nonMatrixByInstance = new Map(); // instanceId -> { moduleType, methods }
+
+      for (const { instanceId, moduleType } of channelTargets) {
+        if (this.debugOverlayActive && logger.debugEnabled) {
+          Projector.logToMain(
+            `instanceId: ${instanceId}, moduleType: ${moduleType}`
+          );
+        }
+
+        const moduleData = get(modulesData, instanceId);
+        if (!moduleData) continue;
+
+        const methods = get(moduleData.methods, channelNumber);
+        if (!Array.isArray(methods) || methods.length === 0) continue;
+
+        const matrixMethod = methods.find((m) => m?.name === "matrix") || null;
+        if (matrixMethod) {
+          matrixOverridesForChannel.set(instanceId, matrixMethod.options);
+        }
+        const nonMatrix = methods.filter((m) => m?.name && m.name !== "matrix");
+        if (nonMatrix.length) {
+          nonMatrixByInstance.set(instanceId, {
+            moduleType,
+            methods: nonMatrix,
+          });
+        }
+      }
+
+      if (matrixOverridesForChannel.size > 0 && this.trackSandboxHost) {
+        try {
+          for (const [id, opts] of matrixOverridesForChannel.entries()) {
+            this.runtimeMatrixOverrides.set(id, opts);
+          }
+        } catch {}
+
+        const assetsBaseUrl = this.getAssetsBaseUrlForSandboxToken(
+          this.trackSandboxHost?.token
+        );
+        const moduleSources = this.trackModuleSources || {};
+        if (assetsBaseUrl) {
+          await Promise.all(
+            Array.from(matrixOverridesForChannel.entries()).map(
+              async ([instanceId, matrixOptions]) => {
+                const res = await this.trackSandboxHost.setMatrixForInstance({
+                  instanceId,
+                  track: this.activeTrack,
+                  moduleSources,
+                  assetsBaseUrl,
+                  matrixOptions,
+                });
+                if (!res || res.ok !== true) {
+                  throw new Error(res?.error || "SANDBOX_SET_MATRIX_FAILED");
+                }
+              }
+            )
+          );
+        }
+      }
+
       await Promise.all(
-        channelTargets.map(async ({ instanceId, moduleType }) => {
-          if (this.debugOverlayActive && logger.debugEnabled) {
-            Projector.logToMain(
-              `instanceId: ${instanceId}, moduleType: ${moduleType}`
+        Array.from(nonMatrixByInstance.entries()).map(
+          async ([instanceId, entry]) => {
+            const moduleInstances = this.activeModules[instanceId] || [];
+            await this.executeMethods(
+              entry.methods,
+              instanceId,
+              moduleInstances,
+              false,
+              {
+                ...debugContext,
+                moduleInfo: { instanceId, type: entry.moduleType },
+                trackName: this.activeTrack.name,
+              }
             );
           }
-
-          const moduleData = get(modulesData, instanceId);
-          if (!moduleData) return;
-
-          const methods = get(moduleData.methods, channelNumber);
-          if (!methods) return;
-
-          const moduleInstances = this.activeModules[instanceId] || [];
-          await this.executeMethods(
-            methods,
-            instanceId,
-            moduleInstances,
-            false,
-            {
-              ...debugContext,
-              moduleInfo: { instanceId, type: moduleType },
-              trackName: this.activeTrack.name,
-            }
-          );
-        })
+        )
       );
     } else {
       if (logger.debugEnabled) {
@@ -1086,14 +1156,21 @@ const Projector = {
     });
 
     if (needsMatrixUpdate && this.trackSandboxHost && this.activeTrack) {
-      const assetsBaseUrl = this.getAssetsBaseUrl();
+      const assetsBaseUrl = this.getAssetsBaseUrlForSandboxToken(
+        this.trackSandboxHost?.token
+      );
       const moduleSources = this.trackModuleSources || {};
       if (assetsBaseUrl) {
-        await this.trackSandboxHost.initTrack({
+        const res = await this.trackSandboxHost.setMatrixForInstance({
+          instanceId,
           track: this.activeTrack,
           moduleSources,
           assetsBaseUrl,
+          matrixOptions,
         });
+        if (!res || res.ok !== true) {
+          throw new Error(res?.error || "SANDBOX_SET_MATRIX_FAILED");
+        }
       }
     }
 

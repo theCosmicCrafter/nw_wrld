@@ -19,7 +19,6 @@ const sampleN = (arr, n) => {
 
 class LowEarthPointModule extends BaseThreeJsModule {
   static methods = [
-    ...((BaseThreeJsModule && BaseThreeJsModule.methods) || []),
     {
       name: "primary",
       executeOnLoad: false,

@@ -25,7 +25,6 @@ const makeRandomMeteor = () => {
 
 class AsteroidGraph extends ModuleBase {
   static methods = [
-    ...((ModuleBase && ModuleBase.methods) || []),
     {
       name: "loadMeteors",
       executeOnLoad: true,

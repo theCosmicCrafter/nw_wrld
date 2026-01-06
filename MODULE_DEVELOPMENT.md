@@ -125,7 +125,6 @@ Navigate to your project folder and create `modules/PulsingCircle.js`:
 class PulsingCircle extends ModuleBase {
   // Define available methods
   static methods = [
-    ...ModuleBase.methods, // Inherit base methods
     {
       name: "pulse",
       executeOnLoad: false,
@@ -323,7 +322,6 @@ Critical for preventing memory leaks and stopping background processes.
 
 ```javascript
 static methods = [
-  ...ModuleBase.methods, // Inherit base methods
   {
     name: "methodName",            // Must match function name
     executeOnLoad: true,           // Run on module load?
@@ -405,7 +403,6 @@ The foundation for all 2D and DOM-based modules.
 
 class MyModule extends ModuleBase {
   static methods = [
-    ...ModuleBase.methods,
     // your methods
   ];
 
@@ -446,7 +443,6 @@ Base class for Three.js 3D modules (extends ModuleBase).
 
 class My3DModule extends BaseThreeJsModule {
   static methods = [
-    ...BaseThreeJsModule.methods,
     // your methods
   ];
 
@@ -585,7 +581,6 @@ MyProject/
 
 class ImageModule extends ModuleBase {
   static methods = [
-    ...ModuleBase.methods,
     {
       name: "image",
       executeOnLoad: true,
@@ -642,7 +637,6 @@ export default ImageModule;
 
 class DataViz extends ModuleBase {
   static methods = [
-    ...ModuleBase.methods,
     {
       name: "loadData",
       executeOnLoad: true,
@@ -752,7 +746,7 @@ p5.js is available globally in workspace modules.
 */
 
 class MyP5Module extends ModuleBase {
-  static methods = [...ModuleBase.methods];
+  static methods = [];
 
   constructor(container) {
     super(container);
@@ -805,7 +799,7 @@ Extend `BaseThreeJsModule` instead of `ModuleBase` for Three.js projects.
 */
 
 class My3DModule extends BaseThreeJsModule {
-  static methods = [...BaseThreeJsModule.methods];
+  static methods = [];
 
   constructor(container) {
     super(container);
@@ -858,7 +852,7 @@ D3.js is available globally in workspace modules.
 */
 
 class MyD3Module extends ModuleBase {
-  static methods = [...ModuleBase.methods];
+  static methods = [];
 
   constructor(container) {
     super(container);

@@ -11,7 +11,6 @@ const sample = (arr) => {
 
 class CubeCube extends BaseThreeJsModule {
   static methods = [
-    ...((BaseThreeJsModule && BaseThreeJsModule.methods) || []),
     {
       name: "appendCube",
       executeOnLoad: false,

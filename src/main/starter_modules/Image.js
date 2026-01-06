@@ -17,7 +17,6 @@ class Image extends ModuleBase {
         },
       ],
     },
-    ...((ModuleBase && ModuleBase.methods) || []),
   ];
 
   constructor(container) {

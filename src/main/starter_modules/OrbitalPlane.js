@@ -5,7 +5,7 @@
 */
 
 class OrbitalPlane extends ModuleBase {
-  static methods = [...((ModuleBase && ModuleBase.methods) || [])];
+  static methods = [];
 
   constructor(container) {
     super(container);

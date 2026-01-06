@@ -25,7 +25,6 @@ const TEMPLATES = {
 
 class ${moduleName} extends ModuleBase {
   static methods = [
-    ...((ModuleBase && ModuleBase.methods) || []),
     {
       name: "exampleMethod",
       executeOnLoad: false,
@@ -81,7 +80,6 @@ export default ${moduleName};
 
 class ${moduleName} extends BaseThreeJsModule {
   static methods = [
-    ...((BaseThreeJsModule && BaseThreeJsModule.methods) || []),
     {
       name: "exampleMethod",
       executeOnLoad: false,
@@ -151,7 +149,6 @@ export default ${moduleName};
 
 class ${moduleName} extends ModuleBase {
   static methods = [
-    ...((ModuleBase && ModuleBase.methods) || []),
     {
       name: "exampleMethod",
       executeOnLoad: false,

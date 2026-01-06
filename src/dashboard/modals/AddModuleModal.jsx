@@ -82,15 +82,24 @@ export const AddModuleModal = ({
                     name: opt.name,
                     value: opt.defaultVal,
                   }))
-                : null,
+                : [],
             }))
         : [];
 
       if (!constructorMethods.some((m) => m.name === "matrix")) {
-        constructorMethods.unshift({ name: "matrix", options: null });
+        constructorMethods.unshift({
+          name: "matrix",
+          options: [
+            { name: "matrix", value: { rows: 1, cols: 1, excludedCells: [] } },
+            { name: "border", value: false },
+          ],
+        });
       }
       if (!constructorMethods.some((m) => m.name === "show")) {
-        constructorMethods.push({ name: "show", options: null });
+        constructorMethods.push({
+          name: "show",
+          options: [{ name: "duration", value: 0 }],
+        });
       }
       track.modulesData[instanceId] = {
         constructor: constructorMethods,
@@ -159,7 +168,13 @@ export const AddModuleModal = ({
                     ) {
                       finalConstructorMethods.unshift({
                         name: "matrix",
-                        options: null,
+                        options: [
+                          {
+                            name: "matrix",
+                            value: { rows: 1, cols: 1, excludedCells: [] },
+                          },
+                          { name: "border", value: false },
+                        ],
                       });
                     }
                     if (
@@ -167,7 +182,7 @@ export const AddModuleModal = ({
                     ) {
                       finalConstructorMethods.push({
                         name: "show",
-                        options: null,
+                        options: [{ name: "duration", value: 0 }],
                       });
                     }
 

@@ -72,6 +72,7 @@ const sandboxOwnerCleanupHooked = new Set(); // ownerWebContentsId
 let sandboxView = null;
 let sandboxViewWebContentsId = null;
 let activeSandboxToken = null;
+let sandboxEnsureInFlight = null;
 const pendingSandboxRequests = new Map(); // requestId -> { resolve, timeout }
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -522,6 +523,7 @@ const sandboxRequestAllowedTypes = new Set([
   "invokeOnInstance",
   "introspectModule",
   "destroyTrack",
+  "setMatrixForInstance",
 ]);
 
 const sendToSandbox = (payload) => {
@@ -581,6 +583,12 @@ ipcMain.handle("sandbox:ensure", async (event) => {
     return { ok: false, reason: "PROJECT_DIR_MISSING" };
   }
 
+  if (sandboxEnsureInFlight) {
+    try {
+      await sandboxEnsureInFlight;
+    } catch {}
+  }
+
   const view = ensureSandboxView(projectDir);
   if (!view || !view.webContents || view.webContents.isDestroyed()) {
     return { ok: false, reason: "SANDBOX_VIEW_UNAVAILABLE" };
@@ -597,24 +605,33 @@ ipcMain.handle("sandbox:ensure", async (event) => {
     activeSandboxToken = null;
   }
 
-  const token = `nw_${Math.random().toString(16).slice(2)}_${Date.now()}`;
-  const reg = registerSandboxToken(event, token, projectDir);
-  if (!reg || reg.ok !== true) {
-    return { ok: false, reason: reg?.reason || "TOKEN_REGISTER_FAILED" };
-  }
+  const p = (async () => {
+    const token = `nw_${Math.random().toString(16).slice(2)}_${Date.now()}`;
+    const reg = registerSandboxToken(event, token, projectDir);
+    if (!reg || reg.ok !== true) {
+      return { ok: false, reason: reg?.reason || "TOKEN_REGISTER_FAILED" };
+    }
 
-  const url = `nw-sandbox://app/moduleSandbox.html#token=${encodeURIComponent(
-    token
-  )}`;
+    const url = `nw-sandbox://app/moduleSandbox.html#token=${encodeURIComponent(
+      token
+    )}`;
+    try {
+      await view.webContents.loadURL(url);
+    } catch (e) {
+      unregisterSandboxToken(token);
+      return { ok: false, reason: "SANDBOX_LOAD_FAILED" };
+    }
+
+    activeSandboxToken = token;
+    return { ok: true, token };
+  })();
+
+  sandboxEnsureInFlight = p;
   try {
-    await view.webContents.loadURL(url);
-  } catch {
-    unregisterSandboxToken(token);
-    return { ok: false, reason: "SANDBOX_LOAD_FAILED" };
+    return await p;
+  } finally {
+    if (sandboxEnsureInFlight === p) sandboxEnsureInFlight = null;
   }
-
-  activeSandboxToken = token;
-  return { ok: true, token };
 });
 
 ipcMain.handle("sandbox:destroy", async (event) => {

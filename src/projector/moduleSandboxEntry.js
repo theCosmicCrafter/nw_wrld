@@ -215,6 +215,30 @@ const createSdk = () => {
 
 globalThis.nwWrldSdk = createSdk();
 
+const mergeMethodsByName = (baseMethods, declaredMethods) => {
+  const out = new Map();
+  const base = Array.isArray(baseMethods) ? baseMethods : [];
+  const declared = Array.isArray(declaredMethods) ? declaredMethods : [];
+  for (const m of base) {
+    const name = m && typeof m.name === "string" ? m.name : null;
+    if (name) out.set(name, m);
+  }
+  for (const m of declared) {
+    const name = m && typeof m.name === "string" ? m.name : null;
+    if (name) out.set(name, m);
+  }
+  return Array.from(out.values());
+};
+
+const getBaseMethodsForClass = (Cls) => {
+  try {
+    if (Cls?.prototype instanceof BaseThreeJsModule)
+      return BaseThreeJsModule.methods;
+    if (Cls?.prototype instanceof ModuleBase) return ModuleBase.methods;
+  } catch {}
+  return [];
+};
+
 const ensureRoot = () => {
   if (trackRoot && trackRoot.isConnected) return trackRoot;
   document.documentElement.style.width = "100%";
@@ -286,6 +310,31 @@ const destroyTrack = () => {
       trackRoot.parentNode.removeChild(trackRoot);
   } catch {}
   trackRoot = null;
+};
+
+const destroyInstance = (instanceId) => {
+  const safeId = String(instanceId || "").trim();
+  if (!safeId) return;
+  try {
+    const entry = instancesById.get(safeId) || null;
+    const arr = Array.isArray(entry?.instances) ? entry.instances : [];
+    for (const inst of arr) {
+      try {
+        if (inst && typeof inst.destroy === "function") inst.destroy();
+      } catch {}
+    }
+  } catch {}
+  try {
+    const nodes = document.querySelectorAll(`[data-instance-id="${safeId}"]`);
+    nodes.forEach((n) => {
+      try {
+        n.parentNode && n.parentNode.removeChild(n);
+      } catch {}
+    });
+  } catch {}
+  try {
+    instancesById.delete(safeId);
+  } catch {}
 };
 
 globalThis.nwSandboxIpc?.on?.(async (data) => {
@@ -424,6 +473,87 @@ globalThis.nwSandboxIpc?.on?.(async (data) => {
       return;
     }
 
+    if (type === "setMatrixForInstance") {
+      const instanceId = String(props.instanceId || "").trim();
+      const track = props.track || {};
+      const trackModules = Array.isArray(track.modules) ? track.modules : [];
+      const modulesData = track.modulesData || {};
+      const moduleSources = props.moduleSources || {};
+      assetsBaseUrl = props.assetsBaseUrl || assetsBaseUrl || null;
+      globalThis.nwWrldSdk = createSdk();
+
+      if (!instanceId) {
+        respond({ ok: false, error: "INVALID_INSTANCE_ID" });
+        return;
+      }
+      const moduleEntry =
+        trackModules.find((m) => m && m.id === instanceId) || null;
+      const moduleType = String(moduleEntry?.type || "").trim();
+      if (!moduleType) {
+        respond({ ok: false, error: "INSTANCE_NOT_IN_TRACK" });
+        return;
+      }
+
+      const matrix = parseMatrixOptions(props.matrixOptions);
+      destroyInstance(instanceId);
+
+      const root = ensureRoot();
+      const zIndex = getInstanceIndex(trackModules, instanceId) + 1;
+      const width = `${100 / matrix.cols}%`;
+      const height = `${100 / matrix.rows}%`;
+      const border = matrix.border ? "1px solid white" : "none";
+
+      const ctor = Array.isArray(modulesData?.[instanceId]?.constructor)
+        ? modulesData[instanceId].constructor
+        : [];
+      const nonMatrix = ctor.filter((mm) => mm?.name && mm.name !== "matrix");
+
+      const ModuleClass = await getModuleClass(moduleType, moduleSources);
+      const instances = [];
+      for (let row = 1; row <= matrix.rows; row++) {
+        for (let col = 1; col <= matrix.cols; col++) {
+          const cellKey = `${row}-${col}`;
+          if (matrix.excludedCells.includes(cellKey)) continue;
+          const el = document.createElement("div");
+          el.className = `module z-index-container ${moduleType}`;
+          el.dataset.instanceId = instanceId;
+          const top = `${(100 / matrix.rows) * (row - 1)}%`;
+          const left = `${(100 / matrix.cols) * (col - 1)}%`;
+          el.style.cssText = [
+            "position:absolute",
+            `width:${width}`,
+            `height:${height}`,
+            `top:${top}`,
+            `left:${left}`,
+            `z-index:${zIndex}`,
+            `border:${border}`,
+            "overflow:hidden",
+            "transform-origin:center",
+          ].join(";");
+          root.appendChild(el);
+          const inst = new ModuleClass(el);
+          instances.push(inst);
+        }
+      }
+
+      instancesById.set(instanceId, { moduleType, instances });
+
+      for (const mm of nonMatrix) {
+        const methodName = String(mm.name || "").trim();
+        if (!methodName) continue;
+        const opts = buildMethodOptions(mm.options);
+        for (const inst of instances) {
+          const fn = inst?.[methodName];
+          if (typeof fn !== "function") continue;
+          const r = fn.call(inst, opts);
+          if (r && typeof r.then === "function") await r;
+        }
+      }
+
+      respond({ ok: true });
+      return;
+    }
+
     if (type === "introspectModule") {
       const moduleType = String(props.moduleType || "").trim();
       const sourceText = String(props.sourceText || "");
@@ -432,6 +562,11 @@ globalThis.nwSandboxIpc?.on?.(async (data) => {
         sourceText
       );
       const callable = getCallableMethodNamesFromClass(ModuleClass);
+      const baseMethods = getBaseMethodsForClass(ModuleClass);
+      const declaredMethods = Array.isArray(ModuleClass?.methods)
+        ? ModuleClass.methods
+        : [];
+      const methods = mergeMethodsByName(baseMethods, declaredMethods);
       respond({
         ok: true,
         callableMethods: callable,
@@ -442,7 +577,7 @@ globalThis.nwSandboxIpc?.on?.(async (data) => {
           ModuleClass?.name ||
           moduleType,
         category: ModuleClass?.category || "Workspace",
-        methods: Array.isArray(ModuleClass?.methods) ? ModuleClass.methods : [],
+        methods,
       });
       return;
     }

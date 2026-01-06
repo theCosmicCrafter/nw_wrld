@@ -6,7 +6,6 @@
 
 class Text extends ModuleBase {
   static methods = [
-    ...((ModuleBase && ModuleBase.methods) || []),
     {
       name: "text",
       executeOnLoad: true,

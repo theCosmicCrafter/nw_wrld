@@ -5,9 +5,7 @@
 */
 
 class SpinningCube extends BaseThreeJsModule {
-  static methods = [
-    ...((BaseThreeJsModule && BaseThreeJsModule.methods) || []),
-  ];
+  static methods = [];
 
   constructor(container) {
     super(container);

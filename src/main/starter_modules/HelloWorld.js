@@ -11,7 +11,6 @@ class HelloWorld extends ModuleBase {
       executeOnLoad: true,
       options: [{ name: "text", defaultVal: "Hello world", type: "text" }],
     },
-    ...((ModuleBase && ModuleBase.methods) || []),
   ];
 
   constructor(container) {

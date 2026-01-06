@@ -6,7 +6,6 @@
 
 class GridOverlay extends ModuleBase {
   static methods = [
-    ...((ModuleBase && ModuleBase.methods) || []),
     {
       name: "size",
       executeOnLoad: true,

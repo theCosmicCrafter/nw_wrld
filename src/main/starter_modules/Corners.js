@@ -6,7 +6,6 @@
 
 class Corners extends ModuleBase {
   static methods = [
-    ...((ModuleBase && ModuleBase.methods) || []),
     {
       name: "color",
       executeOnLoad: true,

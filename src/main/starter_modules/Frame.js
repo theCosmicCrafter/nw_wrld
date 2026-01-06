@@ -45,7 +45,6 @@ class Frame extends ModuleBase {
       name: "randomize",
       executeOnLoad: false,
     },
-    ...((ModuleBase && ModuleBase.methods) || []),
   ];
 
   constructor(container) {
