@@ -65,7 +65,7 @@ All workspace modules must follow the **docblock contract**:
 Allowed `@nwWrld imports`:
 
 - **SDK**: `ModuleBase`, `BaseThreeJsModule`, `assetUrl`, `readText`, `loadJson`
-- **Global libs**: `THREE`, `p5`, `d3`
+- **Global libs**: `THREE`, `p5`, `d3`, `Noise`
 
 ```javascript
 /*

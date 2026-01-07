@@ -3,6 +3,7 @@ import BaseThreeJsModule from "./helpers/threeBase.js";
 import * as THREE from "three";
 import p5 from "p5";
 import * as d3 from "d3";
+import { Noise } from "noisejs";
 import docblock from "../shared/nwWrldDocblock.js";
 import {
   buildMethodOptions,
@@ -15,6 +16,7 @@ const { parseNwWrldDocblockMetadata } = docblock || {};
 if (!globalThis.THREE) globalThis.THREE = THREE;
 if (!globalThis.p5) globalThis.p5 = p5;
 if (!globalThis.d3) globalThis.d3 = d3;
+if (!globalThis.Noise) globalThis.Noise = Noise;
 
 const getTokenFromLocation = () => {
   try {
@@ -40,6 +42,7 @@ const WORKSPACE_MODULE_ALLOWED_IMPORTS = new Set([
   "THREE",
   "p5",
   "d3",
+  "Noise",
 ]);
 
 const safeAssetRelPath = (relPath) => {

@@ -1,52 +1,15 @@
 /*
 @nwWrld name: CloudPointIceberg
 @nwWrld category: 3D
-@nwWrld imports: BaseThreeJsModule, THREE
+@nwWrld imports: BaseThreeJsModule, THREE, Noise
 */
 
-const fade = (t) => t * t * t * (t * (t * 6 - 15) + 10);
-const lerp = (a, b, t) => a + (b - a) * t;
-const hash3 = (x, y, z, seed) => {
-  let h = x * 374761393 + y * 668265263 + z * 2147483647 + seed * 374761393;
-  h = (h ^ (h >> 13)) * 1274126177;
-  h = h ^ (h >> 16);
-  return (h >>> 0) / 4294967295;
-};
-const valueNoise3 = (x, y, z, seed) => {
-  const xi = Math.floor(x);
-  const yi = Math.floor(y);
-  const zi = Math.floor(z);
-  const xf = x - xi;
-  const yf = y - yi;
-  const zf = z - zi;
-
-  const u = fade(xf);
-  const v = fade(yf);
-  const w = fade(zf);
-
-  const n000 = hash3(xi, yi, zi, seed);
-  const n100 = hash3(xi + 1, yi, zi, seed);
-  const n010 = hash3(xi, yi + 1, zi, seed);
-  const n110 = hash3(xi + 1, yi + 1, zi, seed);
-  const n001 = hash3(xi, yi, zi + 1, seed);
-  const n101 = hash3(xi + 1, yi, zi + 1, seed);
-  const n011 = hash3(xi, yi + 1, zi + 1, seed);
-  const n111 = hash3(xi + 1, yi + 1, zi + 1, seed);
-
-  const x00 = lerp(n000, n100, u);
-  const x10 = lerp(n010, n110, u);
-  const x01 = lerp(n001, n101, u);
-  const x11 = lerp(n011, n111, u);
-
-  const y0 = lerp(x00, x10, v);
-  const y1 = lerp(x01, x11, v);
-
-  return lerp(y0, y1, w) * 2 - 1;
-};
-const valueNoise2 = (x, y, seed) => valueNoise3(x, y, 0, seed);
-
 class CloudPointIceberg extends BaseThreeJsModule {
+  static name = "CloudPointIceberg";
+  static category = "3D";
+
   static methods = [
+    ...BaseThreeJsModule.methods,
     {
       name: "randomizeColour",
     },
@@ -54,14 +17,14 @@ class CloudPointIceberg extends BaseThreeJsModule {
 
   constructor(container) {
     super(container);
-    if (!THREE) return;
+    if (!THREE || !Noise) return;
 
     this.name = CloudPointIceberg.name;
 
     this.customGroup = new THREE.Group();
     this.wireMesh = null;
     this.pointCloud = null;
-    this.noiseSeed = Math.floor(Math.random() * 1e9);
+    this.noise = new Noise(Math.random());
     this.lastColorChoice = -1;
 
     this.init();
@@ -82,7 +45,8 @@ class CloudPointIceberg extends BaseThreeJsModule {
 
     const segments = 16;
     const baseSize = 3.5;
-    const noiseSeed = this.noiseSeed;
+    const noiseSeed = Math.random() * 1000;
+    this.noise.seed = noiseSeed;
 
     const vertexCount = (segments + 1) * (segments + 1);
     const vertices = new Float32Array(vertexCount * 3);
@@ -108,47 +72,41 @@ class CloudPointIceberg extends BaseThreeJsModule {
     const getRadiusAtPoint = (cosTheta, sinTheta, phi, normalizedY) => {
       const baseRadius = baseSize * (0.7 + normalizedY * 0.6);
 
-      const noise1 = valueNoise3(
+      const noise1 = this.noise.simplex3(
         cosTheta * 3 + noiseSeed,
         sinTheta * 3 + noiseSeed,
-        normalizedY * 3 + noiseSeed,
-        noiseSeed
+        normalizedY * 3 + noiseSeed
       );
-      const noise2 = valueNoise3(
+      const noise2 = this.noise.simplex3(
         sinTheta * 4.2 + noiseSeed * 1.3,
         cosTheta * 4.2 + noiseSeed * 1.3,
-        normalizedY * 4.2 + noiseSeed * 1.3,
-        noiseSeed
+        normalizedY * 4.2 + noiseSeed * 1.3
       );
-      const noise3 = valueNoise3(
+      const noise3 = this.noise.simplex3(
         cosTheta * 1.8 + noiseSeed * 2.1,
         sinTheta * 1.8 + noiseSeed * 2.1,
-        normalizedY * 1.8 + noiseSeed * 2.1,
-        noiseSeed
+        normalizedY * 1.8 + noiseSeed * 2.1
       );
 
       const combinedNoise = noise1 * 0.5 + noise2 * 0.3 + noise3 * 0.2;
       const irregularity = 0.5 + Math.abs(combinedNoise);
 
-      const protrusionNoise = valueNoise3(
+      const protrusionNoise = this.noise.simplex3(
         cosTheta * 2.5 + noiseSeed * 0.7,
         sinTheta * 2.5 + noiseSeed * 0.7,
-        normalizedY * 2.5 + noiseSeed * 0.7,
-        noiseSeed
+        normalizedY * 2.5 + noiseSeed * 0.7
       );
 
-      const elongationNoise = valueNoise3(
+      const elongationNoise = this.noise.simplex3(
         cosTheta * 1.5 + noiseSeed * 0.5,
         sinTheta * 1.5 + noiseSeed * 0.5,
-        normalizedY * 1.5 + noiseSeed * 0.5,
-        noiseSeed
+        normalizedY * 1.5 + noiseSeed * 0.5
       );
 
-      const carvedNoise = valueNoise3(
+      const carvedNoise = this.noise.simplex3(
         cosTheta * 3.5 + noiseSeed * 1.1,
         sinTheta * 3.5 + noiseSeed * 1.1,
-        normalizedY * 3.5 + noiseSeed * 1.1,
-        noiseSeed
+        normalizedY * 3.5 + noiseSeed * 1.1
       );
 
       let protrusionStrength = 0;
@@ -197,10 +155,9 @@ class CloudPointIceberg extends BaseThreeJsModule {
         const y = (normalizedY - 0.5) * 7;
 
         const verticalVariation =
-          valueNoise2(
+          this.noise.simplex2(
             theta * 2.5 + noiseSeed,
-            normalizedY * 3.5 + noiseSeed,
-            noiseSeed
+            normalizedY * 3.5 + noiseSeed
           ) * 0.3;
         const finalY = y + verticalVariation;
 
@@ -280,10 +237,9 @@ class CloudPointIceberg extends BaseThreeJsModule {
       const y = (normalizedY - 0.5) * 7;
 
       const verticalVariation =
-        valueNoise2(
+        this.noise.simplex2(
           theta * 2.5 + noiseSeed,
-          normalizedY * 3.5 + noiseSeed,
-          noiseSeed
+          normalizedY * 3.5 + noiseSeed
         ) * 0.3;
       const finalY = y + verticalVariation;
 
