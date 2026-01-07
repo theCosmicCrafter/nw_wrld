@@ -301,7 +301,11 @@ const Projector = {
                 );
                 return;
               }
-              return this.previewModule(props.moduleName, props.moduleData);
+              return this.previewModule(
+                props.moduleName,
+                props.moduleData,
+                props.requestId || null
+              );
             }
 
             if (type === "clear-preview") {
@@ -1263,6 +1267,20 @@ const Projector = {
   toggleAspectRatioStyle(selectedRatioId) {
     document.documentElement.classList.remove("reel", "portrait", "scale");
 
+    const dispatchResize = () => {
+      try {
+        requestAnimationFrame(() => {
+          try {
+            window.dispatchEvent(new Event("resize"));
+          } catch {}
+        });
+      } catch {
+        try {
+          window.dispatchEvent(new Event("resize"));
+        } catch {}
+      }
+    };
+
     const ratio = this.settings.aspectRatios.find(
       (r) => r.id === selectedRatioId
     );
@@ -1271,10 +1289,15 @@ const Projector = {
         logger.warn(`Aspect ratio "${selectedRatioId}" not found in settings`);
       }
       document.body.style = ``;
+      dispatchResize();
       return;
     }
 
-    if (ratio.id === "landscape") {
+    if (
+      ratio.id === "default" ||
+      ratio.id === "16-9" ||
+      ratio.id === "landscape"
+    ) {
       document.body.style = ``;
     } else {
       if (ratio.id === "9-16") {
@@ -1291,6 +1314,8 @@ const Projector = {
         transform-origin: center center;
       `;
     }
+
+    dispatchResize();
   },
 
   setBg(colorId) {
@@ -1314,7 +1339,7 @@ const Projector = {
       : "invert(0)";
   },
 
-  async previewModule(moduleName, moduleData) {
+  async previewModule(moduleName, moduleData, requestId = null) {
     const token = ++this.previewToken;
     const debugEnabled = logger.debugEnabled;
     if (debugEnabled) {
@@ -1334,6 +1359,14 @@ const Projector = {
     }
     if (!modulesContainer) {
       logger.error("❌ [PREVIEW] No .modules container found in DOM");
+      if (requestId) {
+        const messaging = getMessaging();
+        messaging?.sendToDashboard?.("preview-module-error", {
+          moduleName,
+          requestId,
+          error: "NO_MODULES_CONTAINER",
+        });
+      }
       return;
     }
 
@@ -1349,12 +1382,19 @@ const Projector = {
       const previewKey = `preview_${moduleName}`;
 
       const src = await this.loadWorkspaceModuleSource(moduleName);
+      if (token !== this.previewToken) {
+        return;
+      }
       const moduleSources = { [moduleName]: { text: src?.text || "" } };
 
       if (this.activeTrack?.name) {
         this.restoreTrackNameAfterPreview = this.activeTrack.name;
       } else {
         this.restoreTrackNameAfterPreview = null;
+      }
+
+      if (this.restoreTrackNameAfterPreview) {
+        this.deactivateActiveTrack();
       }
 
       try {
@@ -1364,6 +1404,14 @@ const Projector = {
       this.trackModuleSources = moduleSources;
 
       await this.trackSandboxHost.ensureSandbox();
+      if (token !== this.previewToken) {
+        try {
+          this.trackSandboxHost?.destroy?.();
+        } catch {}
+        this.trackSandboxHost = null;
+        this.trackModuleSources = null;
+        return;
+      }
       const assetsBaseUrl = this.getAssetsBaseUrlForSandboxToken(
         this.trackSandboxHost.token
       );
@@ -1381,6 +1429,15 @@ const Projector = {
         },
       };
 
+      if (token !== this.previewToken) {
+        try {
+          this.trackSandboxHost?.destroy?.();
+        } catch {}
+        this.trackSandboxHost = null;
+        this.trackModuleSources = null;
+        return;
+      }
+
       const res = await this.trackSandboxHost.initTrack({
         track,
         moduleSources,
@@ -1388,6 +1445,11 @@ const Projector = {
       });
       if (!res || res.ok !== true) {
         throw new Error(res?.error || "SANDBOX_PREVIEW_INIT_FAILED");
+      }
+      if (token !== this.previewToken) {
+        this.clearPreviewForModule(moduleName);
+        if (debugEnabled) logger.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+        return;
       }
       this.activeModules[previewKey] = [{}];
 
@@ -1401,6 +1463,14 @@ const Projector = {
         logger.log(`✅✅✅ [PREVIEW] Preview active for: ${moduleName}`);
         logger.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
       }
+
+      if (requestId) {
+        const messaging = getMessaging();
+        messaging?.sendToDashboard?.("preview-module-ready", {
+          moduleName,
+          requestId,
+        });
+      }
     } catch (error) {
       logger.error(
         `❌ [PREVIEW] Error instantiating module "${moduleName}":`,
@@ -1411,6 +1481,15 @@ const Projector = {
       this.clearPreviewForModule(moduleName);
 
       if (debugEnabled) logger.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+
+      if (requestId) {
+        const messaging = getMessaging();
+        messaging?.sendToDashboard?.("preview-module-error", {
+          moduleName,
+          requestId,
+          error: error?.message || "PREVIEW_FAILED",
+        });
+      }
     }
   },
 
@@ -1464,6 +1543,7 @@ const Projector = {
     const restore = this.restoreTrackNameAfterPreview;
     this.restoreTrackNameAfterPreview = null;
     if (restore) {
+      this.activeTrack = null;
       this.handleTrackSelection(restore);
     }
   },

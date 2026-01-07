@@ -7,7 +7,8 @@ module.exports = (env, argv) => {
   return {
     mode,
     entry: {
-      bundle: ["./src/rendererPolyfills.js", "./src/renderer.js"],
+      dashboard: ["./src/rendererPolyfills.js", "./src/dashboard/entry.js"],
+      projector: ["./src/rendererPolyfills.js", "./src/projector/entry.js"],
       moduleSandbox: "./src/projector/moduleSandboxEntry.js",
     },
     output: {

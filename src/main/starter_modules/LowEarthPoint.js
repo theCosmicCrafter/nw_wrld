@@ -17,6 +17,97 @@ const sampleN = (arr, n) => {
   return out;
 };
 
+const clearThreeGroup = (group) => {
+  if (!group) return;
+  group.children.forEach((child) => {
+    try {
+      if (child.geometry) child.geometry.dispose();
+      if (child.material) {
+        if (Array.isArray(child.material)) {
+          child.material.forEach((m) => m && m.dispose && m.dispose());
+        } else {
+          child.material.dispose && child.material.dispose();
+        }
+      }
+    } catch {}
+  });
+  group.clear();
+};
+
+const createQuadraticBezierLineSegments = ({
+  THREE,
+  points,
+  count,
+  color,
+  opacity,
+  midZScale = 1,
+}) => {
+  const n = Math.max(0, Math.min(points?.length || 0, count || 0));
+  if (n < 2) return null;
+
+  const segmentsPerCurve = 5;
+  const totalPairs = (n * (n - 1)) / 2;
+  const totalSegments = totalPairs * segmentsPerCurve;
+  const positions = new Float32Array(totalSegments * 6);
+
+  let idx = 0;
+
+  for (let i = 0; i < n; i++) {
+    const start = points[i];
+    const sx = start.x;
+    const sy = start.y;
+    const sz = start.z;
+
+    for (let j = i + 1; j < n; j++) {
+      const end = points[j];
+      const ex = end.x;
+      const ey = end.y;
+      const ez = end.z;
+
+      const mx = (sx + ex) / 2;
+      const my = (sy + ey) / 2;
+      const mz = ((sz + ez) / 2) * midZScale;
+
+      let px = sx;
+      let py = sy;
+      let pz = sz;
+
+      for (let s = 1; s <= segmentsPerCurve; s++) {
+        const t = s / segmentsPerCurve;
+        const it = 1 - t;
+        const a = it * it;
+        const b = 2 * it * t;
+        const c = t * t;
+
+        const cx = a * sx + b * mx + c * ex;
+        const cy = a * sy + b * my + c * ey;
+        const cz = a * sz + b * mz + c * ez;
+
+        positions[idx++] = px;
+        positions[idx++] = py;
+        positions[idx++] = pz;
+        positions[idx++] = cx;
+        positions[idx++] = cy;
+        positions[idx++] = cz;
+
+        px = cx;
+        py = cy;
+        pz = cz;
+      }
+    }
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+  const material = new THREE.LineBasicMaterial({
+    color,
+    linewidth: 1,
+    opacity,
+    transparent: true,
+  });
+  return new THREE.LineSegments(geometry, material);
+};
+
 class LowEarthPointModule extends BaseThreeJsModule {
   static methods = [
     {
@@ -123,60 +214,38 @@ class LowEarthPointModule extends BaseThreeJsModule {
   createLines() {
     if (this.destroyed) return;
 
-    this.linesGroup.clear();
+    clearThreeGroup(this.linesGroup);
     const halfPointIndex = Math.floor(this.points.length / 3);
-    for (let i = 0; i < halfPointIndex; i++) {
-      for (let j = i + 1; j < halfPointIndex; j++) {
-        const start = this.points[i];
-        const end = this.points[j];
-        const midZ = (start.z + end.z) / 2;
-        const mid = new THREE.Vector3(
-          (start.x + end.x) / 2,
-          (start.y + end.y) / 2,
-          midZ
-        );
-        const curve = new THREE.QuadraticBezierCurve3(start, mid, end);
-        const points = curve.getPoints(5);
-        const geometry = new THREE.BufferGeometry().setFromPoints(points);
-        const material = new THREE.LineBasicMaterial({
-          color: 0xffffff,
-          linewidth: 1,
-          opacity: 0.1,
-          transparent: true,
-        });
-        const curveObject = new THREE.Line(geometry, material);
-        this.linesGroup.add(curveObject);
-      }
+    const lineSegments = createQuadraticBezierLineSegments({
+      THREE,
+      points: this.points,
+      count: halfPointIndex,
+      color: 0xffffff,
+      opacity: 0.1,
+      midZScale: 1,
+    });
+    if (lineSegments) {
+      this.linesGroup.add(lineSegments);
+      this.customObjects.push(lineSegments);
     }
   }
 
   createRedLines() {
     if (this.destroyed) return;
 
-    this.redLinesGroup.clear();
+    clearThreeGroup(this.redLinesGroup);
     const halfRedPointIndex = Math.floor(this.redPoints.length / 2);
-    for (let i = 0; i < halfRedPointIndex; i++) {
-      for (let j = i + 1; j < halfRedPointIndex; j++) {
-        const start = this.redPoints[i];
-        const end = this.redPoints[j];
-        const midZ = (start.z + end.z) / 2;
-        const mid = new THREE.Vector3(
-          (start.x + end.x) / 2,
-          (start.y + end.y) / 2,
-          midZ * 2
-        );
-        const curve = new THREE.QuadraticBezierCurve3(start, mid, end);
-        const points = curve.getPoints(5);
-        const geometry = new THREE.BufferGeometry().setFromPoints(points);
-        const material = new THREE.LineBasicMaterial({
-          color: 0xff0000,
-          linewidth: 1,
-          opacity: 0.15,
-          transparent: true,
-        });
-        const curveObject = new THREE.Line(geometry, material);
-        this.redLinesGroup.add(curveObject);
-      }
+    const redLineSegments = createQuadraticBezierLineSegments({
+      THREE,
+      points: this.redPoints,
+      count: halfRedPointIndex,
+      color: 0xff0000,
+      opacity: 0.15,
+      midZScale: 2,
+    });
+    if (redLineSegments) {
+      this.redLinesGroup.add(redLineSegments);
+      this.customObjects.push(redLineSegments);
     }
   }
 
@@ -193,15 +262,11 @@ class LowEarthPointModule extends BaseThreeJsModule {
       this.redPointCloud.rotation.y += 0.0003 * this.cameraSettings.cameraSpeed;
     }
 
-    this.linesGroup.children.forEach((line) => {
-      line.rotation.x += 0.0003 * this.cameraSettings.cameraSpeed;
-      line.rotation.y += 0.0003 * this.cameraSettings.cameraSpeed;
-    });
+    this.linesGroup.rotation.x += 0.0003 * this.cameraSettings.cameraSpeed;
+    this.linesGroup.rotation.y += 0.0003 * this.cameraSettings.cameraSpeed;
 
-    this.redLinesGroup.children.forEach((line) => {
-      line.rotation.x += 0.0003 * this.cameraSettings.cameraSpeed;
-      line.rotation.y += 0.0003 * this.cameraSettings.cameraSpeed;
-    });
+    this.redLinesGroup.rotation.x += 0.0003 * this.cameraSettings.cameraSpeed;
+    this.redLinesGroup.rotation.y += 0.0003 * this.cameraSettings.cameraSpeed;
   }
 
   primary({ duration } = {}) {

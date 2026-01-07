@@ -22,20 +22,9 @@ This guide covers installation, setup, and basic usage of nw_wrld.
 
 ## Installation
 
-### Path 1: Install the App (Recommended for Most Users)
+### Developer Setup
 
-**Requirements:** macOS or Windows
-
-1. Download the latest release for your OS from [Releases](https://github.com/aagentah/nw_wrld/releases)
-2. Install / run it:
-   - **macOS**: Open the DMG and drag nw_wrld to Applications, then launch nw_wrld from Applications
-   - **Windows**: Download the portable `.exe` and run it (Windows may show a SmartScreen prompt for unsigned apps)
-
-**No Node.js, terminal, or coding experience required to get started.**
-
-### Path 2: Developer Setup
-
-**Requirements:** Node.js v18+ and basic terminal knowledge
+**Requirements:** Node.js v20+ and basic terminal knowledge
 
 ```bash
 # Clone the repository
@@ -56,7 +45,7 @@ Two windows will open:
 
 ---
 
-**The rest of this guide applies to both installation paths.**
+**The rest of this guide assumes you're running from source.**
 
 ---
 
