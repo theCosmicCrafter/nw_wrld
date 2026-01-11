@@ -8,9 +8,16 @@ import { ModalFooter } from "../components/ModalFooter.js";
 import { Button } from "../components/Button.js";
 import { RadioButton, Label } from "../components/FormInputs.js";
 import { updateActiveSet } from "../core/utils.js";
-import { getActiveSetTracks, getActiveSet } from "../../shared/utils/setUtils.js";
+import {
+  getActiveSetTracks,
+  getActiveSet,
+} from "../../shared/utils/setUtils.js";
 import { EditTrackModal } from "./EditTrackModal.jsx";
 import { deleteRecordingsForTracks } from "../../shared/json/recordingUtils.js";
+import {
+  parsePitchClass,
+  pitchClassToName,
+} from "../../shared/midi/midiUtils.js";
 
 const SortableTrackItem = ({
   track,
@@ -48,14 +55,28 @@ const SortableTrackItem = ({
           >
             {(() => {
               const slot = track?.trackSlot;
-              const trigger =
-                slot && globalMappings?.trackMappings?.[inputType]?.[slot]
+              const rawTrigger =
+                slot &&
+                globalMappings?.trackMappings?.[inputType]?.[slot] !== undefined
                   ? globalMappings.trackMappings[inputType][slot]
                   : "";
-              const modulesCount = track.modules?.length || 0;
-              return trigger
-                ? `${track.name} (${trigger}) (${modulesCount} modules)`
-                : `${track.name} (${modulesCount} modules)`;
+              const trigger =
+                inputType === "midi" &&
+                rawTrigger !== "" &&
+                rawTrigger !== null &&
+                rawTrigger !== undefined
+                  ? (() => {
+                      const pc =
+                        typeof rawTrigger === "number"
+                          ? rawTrigger
+                          : parsePitchClass(rawTrigger);
+                      if (pc === null) return String(rawTrigger);
+                      return pitchClassToName(pc) || String(pc);
+                    })()
+                  : rawTrigger;
+              return trigger !== "" && trigger !== null && trigger !== undefined
+                ? `${track.name} [${trigger}]`
+                : `${track.name}`;
             })()}
           </label>
           <button
@@ -112,9 +133,7 @@ export const SelectTrackModal = ({
           activeSet.tracks.splice(trackIndex, 1);
         });
 
-        setRecordingData((prev) =>
-          deleteRecordingsForTracks(prev, [track.id])
-        );
+        setRecordingData((prev) => deleteRecordingsForTracks(prev, [track.id]));
 
         if (activeTrackId === track.id) {
           const remainingTracks = tracks.filter((t, idx) => idx !== trackIndex);
@@ -145,7 +164,11 @@ export const SelectTrackModal = ({
                 items={tracks}
                 onReorder={(oldIndex, newIndex) => {
                   updateActiveSet(setUserData, activeSetId, (activeSet) => {
-                    activeSet.tracks = arrayMove(activeSet.tracks, oldIndex, newIndex);
+                    activeSet.tracks = arrayMove(
+                      activeSet.tracks,
+                      oldIndex,
+                      newIndex
+                    );
                   });
                 }}
               >
@@ -187,4 +210,3 @@ export const SelectTrackModal = ({
     </>
   );
 };
-
