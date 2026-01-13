@@ -1325,8 +1325,8 @@ const Projector = {
 
     if (
       ratio.id === "default" ||
-      ratio.id === "16-9" ||
-      ratio.id === "landscape"
+      ratio.id === "landscape" ||
+      ratio.id === "fullscreen"
     ) {
       document.body.style = ``;
     } else {
@@ -1337,7 +1337,7 @@ const Projector = {
       }
 
       document.body.style = `
-        width: ${ratio.width}; 
+        width: ${ratio.width};
         height: ${ratio.height};
         position: relative;
         margin: 0 auto;

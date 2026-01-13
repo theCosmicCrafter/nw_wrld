@@ -1527,11 +1527,32 @@ const applyProjectorWindowAspectRatio = (aspectRatioId) => {
   if (!projector1Window || projector1Window.isDestroyed()) return;
 
   const id = String(aspectRatioId || "").trim();
-  const ratio = getProjectorAspectRatioValue(aspectRatioId);
 
   try {
-    projector1Window.setAspectRatio(ratio || 0);
+    projector1Window.setAspectRatio(
+      getProjectorAspectRatioValue(aspectRatioId)
+    );
   } catch {}
+
+  if (id === "fullscreen") {
+    try {
+      const bounds = projector1Window.getBounds();
+      const display = screen.getDisplayMatching(bounds);
+      const workArea = display?.workArea || bounds;
+      projector1Window.setBounds(
+        {
+          x: workArea.x,
+          y: workArea.y,
+          width: workArea.width,
+          height: workArea.height,
+        },
+        false
+      );
+    } catch {}
+    return;
+  }
+
+  const ratio = getProjectorAspectRatioValue(aspectRatioId);
 
   if (!ratio) {
     if (
@@ -1550,23 +1571,57 @@ const applyProjectorWindowAspectRatio = (aspectRatioId) => {
     const display = screen.getDisplayMatching(bounds);
     const workArea = display?.workArea || bounds;
 
-    const nextWidth = Math.max(200, Math.round(bounds.height * ratio));
-    const centerX = bounds.x + Math.round(bounds.width / 2);
-    let nextX = centerX - Math.round(nextWidth / 2);
+    let available = {
+      x: workArea.x,
+      y: workArea.y,
+      width: workArea.width,
+      height: workArea.height,
+    };
 
-    if (typeof workArea.x === "number" && typeof workArea.width === "number") {
-      nextX = Math.max(
-        workArea.x,
-        Math.min(nextX, workArea.x + workArea.width - nextWidth)
-      );
+    const MIN_SIZE = 200;
+    const safeAvailWidth = Math.max(MIN_SIZE, Math.floor(available.width || 0));
+    const safeAvailHeight = Math.max(
+      MIN_SIZE,
+      Math.floor(available.height || 0)
+    );
+
+    let nextWidth;
+    let nextHeight;
+
+    if (ratio >= 1) {
+      nextWidth = Math.max(MIN_SIZE, safeAvailWidth);
+      nextHeight = Math.max(MIN_SIZE, Math.floor(nextWidth / ratio));
+      if (nextHeight > safeAvailHeight) {
+        nextHeight = Math.max(MIN_SIZE, safeAvailHeight);
+        nextWidth = Math.max(MIN_SIZE, Math.floor(nextHeight * ratio));
+      }
+    } else {
+      nextHeight = Math.max(MIN_SIZE, safeAvailHeight);
+      nextWidth = Math.max(MIN_SIZE, Math.floor(nextHeight * ratio));
+      if (nextWidth > safeAvailWidth) {
+        nextWidth = Math.max(MIN_SIZE, safeAvailWidth);
+        nextHeight = Math.max(MIN_SIZE, Math.floor(nextWidth / ratio));
+      }
     }
+
+    const centerX = workArea.x + Math.round(workArea.width / 2);
+    const centerY = workArea.y + Math.round(workArea.height / 2);
+
+    const maxX = available.x + safeAvailWidth - nextWidth;
+    const maxY = available.y + safeAvailHeight - nextHeight;
+
+    let nextX = ratio < 1 ? maxX : centerX - Math.round(nextWidth / 2);
+    let nextY = centerY - Math.round(nextHeight / 2);
+
+    nextX = Math.max(available.x, Math.min(nextX, maxX));
+    nextY = Math.max(available.y, Math.min(nextY, maxY));
 
     projector1Window.setBounds(
       {
         x: nextX,
-        y: bounds.y,
+        y: nextY,
         width: nextWidth,
-        height: bounds.height,
+        height: nextHeight,
       },
       false
     );

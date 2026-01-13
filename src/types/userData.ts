@@ -32,7 +32,14 @@ export type SetId = string;
 export type TrackId = number;
 
 export interface AspectRatioConfig {
-  id: "default" | "landscape" | "16-9" | "9-16" | "4-5" | (string & {});
+  id:
+    | "default"
+    | "fullscreen"
+    | "landscape"
+    | "16-9"
+    | "9-16"
+    | "4-5"
+    | (string & {});
 }
 
 export interface UserConfig {

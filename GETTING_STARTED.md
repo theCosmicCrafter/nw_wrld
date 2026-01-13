@@ -377,6 +377,10 @@ Many DAWs send note events on **MIDI Channel 1** by default. nw_wrld lets you ch
 - Run `npm install` again
 - Check Node.js version: `node --version` (should be v20+)
 
+### Linux/WSL Issues
+
+**libasound.so cannot open shared object file (Windows 11 + WSL/Ubuntu):**
+
 For more help, see [Troubleshooting](README.md#troubleshooting) in the README or check [GitHub Issues](https://github.com/aagentah/nw_wrld/issues).
 
 ---
