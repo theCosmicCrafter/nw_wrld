@@ -446,7 +446,6 @@ These files are managed by the Dashboard and typically don't require manual edit
 | Method not triggering                 | Verify mapping, check method name match, check console                                                         |
 | Hot reload not working                | Check file is saved in project's `modules/` folder                                                             |
 | App won't start (dev mode)            | Close other dev servers (port 9000), run `npm install`                                                         |
-| libasound.so error (Linux/WSL)        | Install ALSA: `sudo apt-get install libasound2-dev`. See [GETTING_STARTED](GETTING_STARTED.md#linuxwsl-issues) |
 
 ---
 
