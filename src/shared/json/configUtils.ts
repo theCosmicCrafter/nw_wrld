@@ -1,4 +1,4 @@
-import { loadJsonFile, loadJsonFileSync } from "./jsonFileBase.js";
+import { loadJsonFile, loadJsonFileSync } from "./jsonFileBase";
 
 const DEFAULT_SETTINGS = {
   aspectRatios: [
@@ -50,3 +50,4 @@ export const loadSettingsSync = () =>
     DEFAULT_SETTINGS,
     "Error loading config.json:"
   );
+

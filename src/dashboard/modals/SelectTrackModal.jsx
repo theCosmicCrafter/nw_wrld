@@ -11,9 +11,9 @@ import { updateActiveSet } from "../core/utils.js";
 import {
   getActiveSetTracks,
   getActiveSet,
-} from "../../shared/utils/setUtils.js";
+} from "../../shared/utils/setUtils.ts";
 import { EditTrackModal } from "./EditTrackModal.jsx";
-import { deleteRecordingsForTracks } from "../../shared/json/recordingUtils.js";
+import { deleteRecordingsForTracks } from "../../shared/json/recordingUtils.ts";
 import {
   parsePitchClass,
   pitchClassToName,

@@ -3,7 +3,7 @@ import {
   loadJsonFileSync,
   saveJsonFile,
   saveJsonFileSync,
-} from "./jsonFileBase.js";
+} from "./jsonFileBase";
 
 const DEFAULT_APP_STATE = {
   activeTrackId: null,
@@ -19,9 +19,9 @@ export const loadAppState = () =>
     "Could not load appState.json, initializing with defaults."
   );
 
-export const saveAppState = (state) => saveJsonFile("appState.json", state);
+export const saveAppState = (state: unknown) => saveJsonFile("appState.json", state);
 
-export const saveAppStateSync = (state) =>
+export const saveAppStateSync = (state: unknown) =>
   saveJsonFileSync("appState.json", state);
 
 export const loadAppStateSync = () =>
@@ -30,3 +30,4 @@ export const loadAppStateSync = () =>
     DEFAULT_APP_STATE,
     "Could not load appState.json, initializing with defaults."
   );
+

@@ -10,17 +10,17 @@ import {
   throttle,
   random,
 } from "lodash";
-import { loadJsonFileSync } from "../shared/json/jsonFileBase.js";
+import { loadJsonFileSync } from "../shared/json/jsonFileBase.ts";
 import {
   buildMidiConfig,
   normalizeNoteMatchMode,
   noteNumberToTriggerKey,
   pitchClassToName,
 } from "../shared/midi/midiUtils.js";
-import { loadSettingsSync } from "../shared/json/configUtils.js";
-import { getActiveSetTracks, migrateToSets } from "../shared/utils/setUtils.js";
-import { buildMethodOptions } from "../shared/utils/methodOptions.js";
-import { getProjectDir } from "../shared/utils/projectDir.js";
+import { loadSettingsSync } from "../shared/json/configUtils.ts";
+import { getActiveSetTracks, migrateToSets } from "../shared/utils/setUtils.ts";
+import { buildMethodOptions } from "../shared/utils/methodOptions.ts";
+import { getProjectDir } from "../shared/utils/projectDir.ts";
 import logger from "./helpers/logger.js";
 const getBridge = () => globalThis.nwWrldBridge;
 

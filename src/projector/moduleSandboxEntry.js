@@ -13,8 +13,8 @@ import docblock from "../shared/nwWrldDocblock.js";
 import {
   buildMethodOptions,
   parseMatrixOptions,
-} from "../shared/utils/methodOptions.js";
-import { createSdkHelpers } from "../shared/utils/sdkHelpers.js";
+} from "../shared/utils/methodOptions.ts";
+import { createSdkHelpers } from "../shared/utils/sdkHelpers.ts";
 
 const { parseNwWrldDocblockMetadata } = docblock || {};
 

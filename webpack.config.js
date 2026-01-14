@@ -11,6 +11,9 @@ module.exports = (env, argv) => {
       projector: ["./src/rendererPolyfills.js", "./src/projector/entry.js"],
       moduleSandbox: "./src/projector/moduleSandboxEntry.js",
     },
+    resolve: {
+      extensions: [".js", ".jsx", ".ts", ".json"],
+    },
     output: {
       path: path.resolve(__dirname, "dist"),
       filename: "[name].js",
@@ -24,6 +27,20 @@ module.exports = (env, argv) => {
     },
     module: {
       rules: [
+        {
+          test: /\.ts$/,
+          include: [
+            path.resolve(__dirname, "src", "shared", "json"),
+            path.resolve(__dirname, "src", "shared", "utils"),
+          ],
+          exclude: /node_modules/,
+          use: {
+            loader: "babel-loader",
+            options: {
+              presets: ["@babel/preset-env", "@babel/preset-typescript"],
+            },
+          },
+        },
         {
           test: /\.(js|jsx)$/,
           exclude: /node_modules/,

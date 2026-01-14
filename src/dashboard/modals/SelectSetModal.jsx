@@ -10,7 +10,7 @@ import { RadioButton, Label } from "../components/FormInputs.js";
 import { updateUserData } from "../core/utils.js";
 import { EditSetModal } from "./EditSetModal.jsx";
 import { ConfirmationModal } from "./ConfirmationModal.jsx";
-import { deleteRecordingsForTracks } from "../../shared/json/recordingUtils.js";
+import { deleteRecordingsForTracks } from "../../shared/json/recordingUtils.ts";
 
 const SortableSetItem = ({
   set,

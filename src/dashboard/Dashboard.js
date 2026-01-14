@@ -1,16 +1,10 @@
 // Dashboard.js
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  useMemo,
-  useRef,
-} from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { createRoot } from "react-dom/client";
 import { useAtom } from "jotai";
 import { produce } from "immer";
 import * as Tone from "tone";
-import { loadSettings } from "../shared/json/configUtils.js";
+import { loadSettings } from "../shared/json/configUtils.ts";
 import {
   loadRecordingData,
   saveRecordingData,
@@ -19,17 +13,17 @@ import {
   setRecordingForTrack,
   getSequencerForTrack,
   setSequencerForTrack,
-} from "../shared/json/recordingUtils.js";
+} from "../shared/json/recordingUtils.ts";
 import {
   loadAppState,
   loadAppStateSync,
   saveAppState,
   saveAppStateSync,
-} from "../shared/json/appStateUtils.js";
+} from "../shared/json/appStateUtils.ts";
 import MidiPlayback from "../shared/midi/midiPlayback.js";
 import SequencerPlayback from "../shared/sequencer/SequencerPlayback.js";
 import SequencerAudio from "../shared/audio/sequencerAudio.js";
-import { getActiveSetTracks } from "../shared/utils/setUtils.js";
+import { getActiveSetTracks } from "../shared/utils/setUtils.ts";
 import { Button } from "./components/Button.js";
 import { ModalHeader } from "./components/ModalHeader.js";
 import { ModalFooter } from "./components/ModalFooter.js";
@@ -42,11 +36,7 @@ import {
   updateUserData,
   updateActiveSet,
 } from "./core/utils.js";
-import {
-  useIPCSend,
-  useIPCListener,
-  useIPCInvoke,
-} from "./core/hooks/useIPC.js";
+import { useIPCSend, useIPCListener, useIPCInvoke } from "./core/hooks/useIPC.js";
 import {
   userDataAtom,
   recordingDataAtom,
@@ -79,7 +69,7 @@ import { DashboardFooter } from "./components/DashboardFooter.jsx";
 import { useWorkspaceModules } from "./core/hooks/useWorkspaceModules.js";
 import { useInputEvents } from "./core/hooks/useInputEvents.js";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
-import { getProjectDir } from "../shared/utils/projectDir.js";
+import { getProjectDir } from "../shared/utils/projectDir.ts";
 
 // =========================
 // Components
@@ -92,12 +82,9 @@ const Dashboard = () => {
   const [activeSetId, setActiveSetId] = useAtom(activeSetIdAtom);
   const [predefinedModules, setPredefinedModules] = useState([]);
   const [selectedChannel, setSelectedChannel] = useAtom(selectedChannelAtom);
-  const [selectedTrackForModuleMenu, setSelectedTrackForModuleMenu] =
-    useState(null);
+  const [selectedTrackForModuleMenu, setSelectedTrackForModuleMenu] = useState(null);
   const [flashingChannels, flashChannel] = useFlashingChannels();
-  const [flashingConstructors, setFlashingConstructors] = useAtom(
-    flashingConstructorsAtom
-  );
+  const [flashingConstructors, setFlashingConstructors] = useAtom(flashingConstructorsAtom);
 
   const sendToProjector = useIPCSend("dashboard-to-projector");
   const invokeIPC = useIPCInvoke();
@@ -239,12 +226,10 @@ const Dashboard = () => {
   const [isSelectSetModalOpen, setIsSelectSetModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isAddModuleModalOpen, setIsAddModuleModalOpen] = useState(false);
-  const [isManageModulesModalOpen, setIsManageModulesModalOpen] =
-    useState(false);
+  const [isManageModulesModalOpen, setIsManageModulesModalOpen] = useState(false);
   const [isDebugOverlayOpen, setIsDebugOverlayOpen] = useState(false);
   const [isReleaseNotesOpen, setIsReleaseNotesOpen] = useState(false);
-  const [isInputMappingsModalOpen, setIsInputMappingsModalOpen] =
-    useState(false);
+  const [isInputMappingsModalOpen, setIsInputMappingsModalOpen] = useState(false);
   const [confirmationModal, setConfirmationModal] = useState(null);
   const [debugLogs, setDebugLogs] = useState([]);
   const [footerPlaybackState, setFooterPlaybackState] = useState({});
@@ -257,8 +242,7 @@ const Dashboard = () => {
   const [workspaceModalMode, setWorkspaceModalMode] = useState("initial");
   const [workspaceModalPath, setWorkspaceModalPath] = useState(null);
   const [workspaceModuleFiles, setWorkspaceModuleFiles] = useState([]);
-  const [workspaceModuleLoadFailures, setWorkspaceModuleLoadFailures] =
-    useState([]);
+  const [workspaceModuleLoadFailures, setWorkspaceModuleLoadFailures] = useState([]);
   const didMigrateWorkspaceModuleTypesRef = useRef(false);
   const loadModulesRunIdRef = useRef(0);
   const sequencerEngineRef = useRef(null);
@@ -333,13 +317,11 @@ const Dashboard = () => {
       setSequencerCurrentStep(0);
     }
 
-    Object.entries(footerPlaybackEngineRef.current).forEach(
-      ([trackId, engine]) => {
-        if (engine) {
-          engine.stop();
-        }
+    Object.entries(footerPlaybackEngineRef.current).forEach(([trackId, engine]) => {
+      if (engine) {
+        engine.stop();
       }
-    );
+    });
     setFooterPlaybackState({});
 
     const tracks = getActiveSetTracks(userDataRef.current || {}, activeSetId);
@@ -381,23 +363,20 @@ const Dashboard = () => {
   const handleDeleteChannel = useCallback(
     (channelNumber) => {
       if (!selectedChannel) return;
-      openConfirmationModal(
-        `Are you sure you want to delete Channel ${channelNumber}?`,
-        () => {
-          updateActiveSet(setUserData, activeSetId, (activeSet) => {
-            const currentTrack = activeSet.tracks[selectedChannel.trackIndex];
-            const channelKey = String(channelNumber);
+      openConfirmationModal(`Are you sure you want to delete Channel ${channelNumber}?`, () => {
+        updateActiveSet(setUserData, activeSetId, (activeSet) => {
+          const currentTrack = activeSet.tracks[selectedChannel.trackIndex];
+          const channelKey = String(channelNumber);
 
-            delete currentTrack.channelMappings[channelKey];
+          delete currentTrack.channelMappings[channelKey];
 
-            Object.keys(currentTrack.modulesData).forEach((moduleId) => {
-              if (currentTrack.modulesData[moduleId].methods) {
-                delete currentTrack.modulesData[moduleId].methods[channelKey];
-              }
-            });
+          Object.keys(currentTrack.modulesData).forEach((moduleId) => {
+            if (currentTrack.modulesData[moduleId].methods) {
+              delete currentTrack.modulesData[moduleId].methods[channelKey];
+            }
           });
-        }
-      );
+        });
+      });
     },
     [selectedChannel, setUserData, openConfirmationModal]
   );
@@ -417,9 +396,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (userData.config) {
       const storedAspect = userData.config.aspectRatio;
-      setAspectRatio(
-        !storedAspect || storedAspect === "landscape" ? "default" : storedAspect
-      );
+      setAspectRatio(!storedAspect || storedAspect === "landscape" ? "default" : storedAspect);
       setBgColor(userData.config.bgColor || "grey");
     }
   }, [userData]);
@@ -463,8 +440,7 @@ const Dashboard = () => {
 
     const updateAppState = async () => {
       const currentState = await loadAppState();
-      const preservedWorkspacePath =
-        workspacePathRef.current ?? currentState.workspacePath ?? null;
+      const preservedWorkspacePath = workspacePathRef.current ?? currentState.workspacePath ?? null;
       const stateToSave = {
         ...currentState,
         activeTrackId,
@@ -512,9 +488,7 @@ const Dashboard = () => {
     if (!moduleId) return;
 
     if (payload.ok) {
-      const incomingMethods = Array.isArray(payload.methods)
-        ? payload.methods
-        : [];
+      const incomingMethods = Array.isArray(payload.methods) ? payload.methods : [];
       setPredefinedModules((prev) =>
         (prev || []).map((m) =>
           m && m.id === moduleId
@@ -526,9 +500,7 @@ const Dashboard = () => {
             : m
         )
       );
-      setWorkspaceModuleLoadFailures((prev) =>
-        (prev || []).filter((id) => id !== moduleId)
-      );
+      setWorkspaceModuleLoadFailures((prev) => (prev || []).filter((id) => id !== moduleId));
 
       const executeOnLoad = incomingMethods
         .filter((m) => m && m.executeOnLoad)
@@ -536,9 +508,7 @@ const Dashboard = () => {
 
       if (executeOnLoad.length) {
         updateActiveSet(setUserData, activeSetId, (activeSet) => {
-          const tracks = Array.isArray(activeSet?.tracks)
-            ? activeSet.tracks
-            : [];
+          const tracks = Array.isArray(activeSet?.tracks) ? activeSet.tracks : [];
           for (const track of tracks) {
             const modules = Array.isArray(track?.modules) ? track.modules : [];
             const modulesData = track?.modulesData || null;
@@ -551,21 +521,15 @@ const Dashboard = () => {
               if (type !== moduleId) continue;
 
               const data = modulesData[instId];
-              const ctor = Array.isArray(data?.constructor)
-                ? data.constructor
-                : null;
+              const ctor = Array.isArray(data?.constructor) ? data.constructor : null;
               if (!ctor) continue;
 
-              const names = ctor
-                .map((m) => (m?.name ? String(m.name) : ""))
-                .filter(Boolean);
+              const names = ctor.map((m) => (m?.name ? String(m.name) : "")).filter(Boolean);
               if (names.length > 2) continue;
               if (names.some((n) => n !== "matrix" && n !== "show")) continue;
 
               const existingSet = new Set(names);
-              const missing = executeOnLoad.filter(
-                (m) => !existingSet.has(m.name)
-              );
+              const missing = executeOnLoad.filter((m) => !existingSet.has(m.name));
               if (!missing.length) continue;
 
               const matrix = ctor.find((m) => m?.name === "matrix") || null;
@@ -597,9 +561,7 @@ const Dashboard = () => {
         return [...list, moduleId];
       });
       setPredefinedModules((prev) =>
-        (prev || []).map((m) =>
-          m && m.id === moduleId ? { ...m, status: "failed" } : m
-        )
+        (prev || []).map((m) => (m && m.id === moduleId ? { ...m, status: "failed" } : m))
       );
     }
   });
@@ -616,13 +578,11 @@ const Dashboard = () => {
       setSequencerCurrentStep(0);
     }
 
-    Object.entries(footerPlaybackEngineRef.current).forEach(
-      ([trackId, engine]) => {
-        if (engine) {
-          engine.stop();
-        }
+    Object.entries(footerPlaybackEngineRef.current).forEach(([trackId, engine]) => {
+      if (engine) {
+        engine.stop();
       }
-    );
+    });
     setFooterPlaybackState({});
   }, []);
   useWorkspaceModules({
@@ -671,9 +631,7 @@ const Dashboard = () => {
       } else {
         const bridge = globalThis.nwWrldBridge;
         const isAvailable =
-          bridge &&
-          bridge.project &&
-          typeof bridge.project.isDirAvailable === "function"
+          bridge && bridge.project && typeof bridge.project.isDirAvailable === "function"
             ? bridge.project.isDirAvailable()
             : false;
         if (!isAvailable) {
@@ -800,10 +758,7 @@ const Dashboard = () => {
             draft.config = {};
           }
 
-          const hasUserColors = Object.prototype.hasOwnProperty.call(
-            updates || {},
-            "userColors"
-          );
+          const hasUserColors = Object.prototype.hasOwnProperty.call(updates || {}, "userColors");
 
           if (hasUserColors) {
             const palette = normalizeUserColors(updates.userColors);
@@ -835,17 +790,14 @@ const Dashboard = () => {
             for (const set of sets) {
               const tracks = Array.isArray(set?.tracks) ? set.tracks : [];
               for (const track of tracks) {
-                const modulesData =
-                  track && typeof track === "object" ? track.modulesData : null;
+                const modulesData = track && typeof track === "object" ? track.modulesData : null;
                 if (!modulesData || typeof modulesData !== "object") continue;
                 for (const instanceId of Object.keys(modulesData)) {
                   const md = modulesData[instanceId];
                   if (!md || typeof md !== "object") continue;
                   syncMethodList(md.constructor);
                   const methodsByChannel =
-                    md.methods && typeof md.methods === "object"
-                      ? md.methods
-                      : null;
+                    md.methods && typeof md.methods === "object" ? md.methods : null;
                   if (!methodsByChannel) continue;
                   for (const channelKey of Object.keys(methodsByChannel)) {
                     syncMethodList(methodsByChannel[channelKey]);
@@ -941,52 +893,46 @@ const Dashboard = () => {
       if (!sequencerEngineRef.current) {
         sequencerEngineRef.current = new SequencerPlayback();
 
-        sequencerEngineRef.current.setOnStepCallback(
-          (stepIndex, channels, time, runId) => {
-            const hasScheduledTime =
-              typeof time === "number" && Number.isFinite(time);
+        sequencerEngineRef.current.setOnStepCallback((stepIndex, channels, time, runId) => {
+          const hasScheduledTime = typeof time === "number" && Number.isFinite(time);
 
-            if (
-              typeof runId === "number" &&
-              runId !== sequencerRunIdRef.current
-            ) {
-              return;
+          if (typeof runId === "number" && runId !== sequencerRunIdRef.current) {
+            return;
+          }
+
+          channels.forEach((channelName) => {
+            if (sequencerAudioRef.current && !sequencerMutedRef.current) {
+              const channelNumber = channelName.replace(/^ch/, "");
+              sequencerAudioRef.current.playChannelBeep(
+                channelNumber,
+                hasScheduledTime ? time : undefined
+              );
             }
+          });
 
-            channels.forEach((channelName) => {
-              if (sequencerAudioRef.current && !sequencerMutedRef.current) {
-                const channelNumber = channelName.replace(/^ch/, "");
-                sequencerAudioRef.current.playChannelBeep(
-                  channelNumber,
-                  hasScheduledTime ? time : undefined
-                );
+          if (hasScheduledTime) {
+            const scheduledRunId = runId;
+            Tone.Draw.schedule(() => {
+              if (
+                typeof scheduledRunId === "number" &&
+                scheduledRunId !== sequencerRunIdRef.current
+              ) {
+                return;
               }
-            });
-
-            if (hasScheduledTime) {
-              const scheduledRunId = runId;
-              Tone.Draw.schedule(() => {
-                if (
-                  typeof scheduledRunId === "number" &&
-                  scheduledRunId !== sequencerRunIdRef.current
-                ) {
-                  return;
-                }
-                setSequencerCurrentStep(stepIndex);
-                channels.forEach((channelName) => {
-                  flashChannel(channelName, 100);
-                  sendToProjector("channel-trigger", { channelName });
-                });
-              }, time);
-            } else {
               setSequencerCurrentStep(stepIndex);
               channels.forEach((channelName) => {
                 flashChannel(channelName, 100);
                 sendToProjector("channel-trigger", { channelName });
               });
-            }
+            }, time);
+          } else {
+            setSequencerCurrentStep(stepIndex);
+            channels.forEach((channelName) => {
+              flashChannel(channelName, 100);
+              sendToProjector("channel-trigger", { channelName });
+            });
           }
-        );
+        });
       }
 
       if (!sequencerAudioRef.current) {
@@ -999,9 +945,7 @@ const Dashboard = () => {
         const bpm = config.sequencerBpm || 120;
         sequencerEngineRef.current.load(pattern, bpm);
 
-        const keys = track.modules.map(
-          (moduleInstance) => `${track.id}:${moduleInstance.id}`
-        );
+        const keys = track.modules.map((moduleInstance) => `${track.id}:${moduleInstance.id}`);
         setFlashingConstructors((prev) => {
           const next = new Set(prev);
           keys.forEach((k) => next.add(k));
@@ -1030,16 +974,14 @@ const Dashboard = () => {
       if (!footerPlaybackEngineRef.current[trackId]) {
         footerPlaybackEngineRef.current[trackId] = new MidiPlayback();
 
-        footerPlaybackEngineRef.current[trackId].setOnNoteCallback(
-          (channelName, midiNote) => {
-            const channelNumber = channelName.replace(/^ch/, "");
-            flashChannel(channelNumber, 100);
+        footerPlaybackEngineRef.current[trackId].setOnNoteCallback((channelName, midiNote) => {
+          const channelNumber = channelName.replace(/^ch/, "");
+          flashChannel(channelNumber, 100);
 
-            sendToProjector("channel-trigger", {
-              channelName: channelName,
-            });
-          }
-        );
+          sendToProjector("channel-trigger", {
+            channelName: channelName,
+          });
+        });
 
         footerPlaybackEngineRef.current[trackId].setOnStopCallback(() => {
           setFooterPlaybackState((prev) => ({ ...prev, [trackId]: false }));
@@ -1047,11 +989,7 @@ const Dashboard = () => {
 
         try {
           const recording = getRecordingForTrack(recordingData, track.id);
-          if (
-            !recording ||
-            !recording.channels ||
-            recording.channels.length === 0
-          ) {
+          if (!recording || !recording.channels || recording.channels.length === 0) {
             alert("No recording available. Trigger some channels first.");
             return;
           }
@@ -1072,9 +1010,7 @@ const Dashboard = () => {
       }
 
       if (!isPlaying) {
-        const keys = track.modules.map(
-          (moduleInstance) => `${track.id}:${moduleInstance.id}`
-        );
+        const keys = track.modules.map((moduleInstance) => `${track.id}:${moduleInstance.id}`);
         setFlashingConstructors((prev) => {
           const next = new Set(prev);
           keys.forEach((k) => next.add(k));
@@ -1134,9 +1070,7 @@ const Dashboard = () => {
 
       const target = e.target;
       const isTyping =
-        target.tagName === "INPUT" ||
-        target.tagName === "TEXTAREA" ||
-        target.isContentEditable;
+        target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable;
 
       if (isTyping) return;
 
@@ -1157,12 +1091,7 @@ const Dashboard = () => {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [
-    userData.config,
-    isSequencerPlaying,
-    handleFooterStop,
-    handleFooterPlayPause,
-  ]);
+  }, [userData.config, isSequencerPlaying, handleFooterStop, handleFooterPlayPause]);
 
   useEffect(() => {
     return () => {
@@ -1198,15 +1127,10 @@ const Dashboard = () => {
         <div className="bg-[#101010] p-6 font-mono">
           {(() => {
             const tracks = getActiveSetTracks(userData, activeSetId);
-            const hasActiveTrack =
-              activeTrackId && tracks.find((t) => t.id === activeTrackId);
+            const hasActiveTrack = activeTrackId && tracks.find((t) => t.id === activeTrackId);
 
             if (!activeTrackId || !hasActiveTrack) {
-              return (
-                <div className="text-neutral-300/30 text-[11px]">
-                  No tracks to display.
-                </div>
-              );
+              return <div className="text-neutral-300/30 text-[11px]">No tracks to display.</div>;
             }
 
             return (
@@ -1214,9 +1138,7 @@ const Dashboard = () => {
                 {tracks
                   .filter((track) => track.id === activeTrackId)
                   .map((track) => {
-                    const trackIndex = tracks.findIndex(
-                      (t) => t.id === track.id
-                    );
+                    const trackIndex = tracks.findIndex((t) => t.id === track.id);
                     return (
                       <TrackItem
                         key={track.id}
@@ -1233,9 +1155,7 @@ const Dashboard = () => {
                         handleSequencerToggle={handleSequencerToggle}
                         workspacePath={workspacePath}
                         workspaceModuleFiles={workspaceModuleFiles}
-                        workspaceModuleLoadFailures={
-                          workspaceModuleLoadFailures
-                        }
+                        workspaceModuleLoadFailures={workspaceModuleLoadFailures}
                       />
                     );
                   })}
@@ -1251,8 +1171,8 @@ const Dashboard = () => {
           userData.config.sequencerMode
             ? isSequencerPlaying
             : firstVisibleTrack
-            ? footerPlaybackState[firstVisibleTrack.track.id] || false
-            : false
+              ? footerPlaybackState[firstVisibleTrack.track.id] || false
+              : false
         }
         onPlayPause={handleFooterPlayPause}
         onStop={handleFooterStop}
@@ -1333,10 +1253,7 @@ const Dashboard = () => {
         isOpen={isInputMappingsModalOpen}
         onClose={() => setIsInputMappingsModalOpen(false)}
       />
-      <ReleaseNotesModal
-        isOpen={isReleaseNotesOpen}
-        onClose={() => setIsReleaseNotesOpen(false)}
-      />
+      <ReleaseNotesModal isOpen={isReleaseNotesOpen} onClose={() => setIsReleaseNotesOpen(false)} />
       <AddModuleModal
         isOpen={isAddModuleModalOpen}
         onClose={() => {
@@ -1417,9 +1334,7 @@ const Dashboard = () => {
       <Modal isOpen={isWorkspaceModalOpen} onClose={() => {}}>
         <ModalHeader
           title={
-            workspaceModalMode === "lostSync"
-              ? "PROJECT FOLDER NOT FOUND"
-              : `Welcome to "nw_wrld"`
+            workspaceModalMode === "lostSync" ? "PROJECT FOLDER NOT FOUND" : `Welcome to "nw_wrld"`
           }
           onClose={() => {}}
           showClose={false}
@@ -1435,9 +1350,9 @@ const Dashboard = () => {
           </div>
           {workspaceModalMode === "lostSync" ? null : (
             <div className="text-neutral-500">
-              PS: This app is currently in beta and changes frequently. Projects
-              created with earlier versions may not load correctly; backwards
-              compatibility is not guaranteed until a stable release.
+              PS: This app is currently in beta and changes frequently. Projects created with
+              earlier versions may not load correctly; backwards compatibility is not guaranteed
+              until a stable release.
             </div>
           )}
           {workspaceModalPath || workspacePath ? (
@@ -1446,13 +1361,9 @@ const Dashboard = () => {
             </div>
           ) : null}
         </div>
-        <ModalFooter
-          justify={workspaceModalMode === "lostSync" ? "end" : "center"}
-        >
+        <ModalFooter justify={workspaceModalMode === "lostSync" ? "end" : "center"}>
           <Button type="secondary" onClick={handleSelectWorkspace}>
-            {workspaceModalMode === "lostSync"
-              ? "REOPEN PROJECT"
-              : "OPEN PROJECT"}
+            {workspaceModalMode === "lostSync" ? "REOPEN PROJECT" : "OPEN PROJECT"}
           </Button>
         </ModalFooter>
       </Modal>
@@ -1464,8 +1375,7 @@ const Dashboard = () => {
 // Render the Dashboard
 // =========================
 
-const rootElement =
-  document.getElementById("dashboard") || document.getElementById("root");
+const rootElement = document.getElementById("dashboard") || document.getElementById("root");
 if (rootElement) {
   createRoot(rootElement).render(
     <ErrorBoundary>

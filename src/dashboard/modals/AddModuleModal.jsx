@@ -14,7 +14,7 @@ import { Button } from "../components/Button.js";
 import { HelpIcon } from "../components/HelpIcon.js";
 import { activeSetIdAtom, activeTrackIdAtom } from "../core/state.js";
 import { updateActiveSet } from "../core/utils.js";
-import { getActiveSetTracks } from "../../shared/utils/setUtils.js";
+import { getActiveSetTracks } from "../../shared/utils/setUtils.ts";
 import { HELP_TEXT } from "../../shared/helpText.js";
 
 export const AddModuleModal = ({

@@ -13,11 +13,11 @@ import {
   useFlashingChannels,
 } from "../../core/state.js";
 import { updateActiveSet } from "../../core/utils.js";
-import { getActiveSetTracks } from "../../../shared/utils/setUtils.js";
+import { getActiveSetTracks } from "../../../shared/utils/setUtils.ts";
 import {
   getRecordingForTrack,
   setRecordingForTrack,
-} from "../../../shared/json/recordingUtils.js";
+} from "../../../shared/json/recordingUtils.ts";
 import MidiPlayback from "../../../shared/midi/midiPlayback.js";
 import { Button } from "../Button.js";
 import { TrackDataModal } from "../../modals/TrackDataModal.jsx";

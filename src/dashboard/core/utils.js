@@ -1,5 +1,5 @@
 import { produce } from "immer";
-import { migrateToSets, getActiveSet } from "../../shared/utils/setUtils.js";
+import { migrateToSets, getActiveSet } from "../../shared/utils/setUtils.ts";
 import {
   DEFAULT_GLOBAL_MAPPINGS,
   DEFAULT_INPUT_CONFIG,
@@ -9,7 +9,7 @@ import {
   loadJsonFile,
   saveJsonFile,
   saveJsonFileSync,
-} from "../../shared/json/jsonFileBase.js";
+} from "../../shared/json/jsonFileBase.ts";
 
 const getMethodsByLayer = (module, moduleBase, threeBase) => {
   if (!module || !module.methods) return [];
@@ -17,9 +17,7 @@ const getMethodsByLayer = (module, moduleBase, threeBase) => {
   const layers = [];
   const allModuleMethods = module.methods.map((m) => m.name);
 
-  const baseMethodsInModule = allModuleMethods.filter((name) =>
-    moduleBase.includes(name)
-  );
+  const baseMethodsInModule = allModuleMethods.filter((name) => moduleBase.includes(name));
   if (baseMethodsInModule.length > 0) {
     layers.push({
       name: "Base",
@@ -27,9 +25,7 @@ const getMethodsByLayer = (module, moduleBase, threeBase) => {
     });
   }
 
-  const threeBaseMethodsOnly = threeBase.filter(
-    (name) => !moduleBase.includes(name)
-  );
+  const threeBaseMethodsOnly = threeBase.filter((name) => !moduleBase.includes(name));
   const threeMethodsInModule = allModuleMethods.filter((name) =>
     threeBaseMethodsOnly.includes(name)
   );
@@ -41,9 +37,7 @@ const getMethodsByLayer = (module, moduleBase, threeBase) => {
   }
 
   const allBaseMethods = [...moduleBase, ...threeBase];
-  const moduleMethods = allModuleMethods.filter(
-    (name) => !allBaseMethods.includes(name)
-  );
+  const moduleMethods = allModuleMethods.filter((name) => !allBaseMethods.includes(name));
   if (moduleMethods.length > 0) {
     layers.push({
       name: module.name,
@@ -57,11 +51,7 @@ const getMethodsByLayer = (module, moduleBase, threeBase) => {
 const getMethodCode = (moduleName, methodName) => {
   try {
     const bridge = globalThis.nwWrldBridge;
-    if (
-      !bridge ||
-      !bridge.app ||
-      typeof bridge.app.getMethodCode !== "function"
-    ) {
+    if (!bridge || !bridge.app || typeof bridge.app.getMethodCode !== "function") {
       return { code: null, filePath: null };
     }
     const res = bridge.app.getMethodCode(moduleName, methodName);
@@ -137,8 +127,7 @@ const loadUserData = async () => {
     }
   }
   if (!migratedData.config.channelMappings) {
-    migratedData.config.channelMappings =
-      DEFAULT_GLOBAL_MAPPINGS.channelMappings;
+    migratedData.config.channelMappings = DEFAULT_GLOBAL_MAPPINGS.channelMappings;
   } else if (migratedData.config.channelMappings?.midi) {
     const currentMidi = migratedData.config.channelMappings.midi;
     if (
@@ -174,9 +163,7 @@ const saveUserData = async (data) => {
     return;
   }
   if (Array.isArray(data?.sets) && data.sets.length === 0) {
-    console.warn(
-      "Skipping save: data has empty sets array. Not overwriting file with empty data."
-    );
+    console.warn("Skipping save: data has empty sets array. Not overwriting file with empty data.");
     return;
   }
   try {

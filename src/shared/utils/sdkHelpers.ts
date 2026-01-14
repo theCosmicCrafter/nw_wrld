@@ -1,9 +1,16 @@
-export const createSdkHelpers = ({
-  assetUrlImpl,
-  readTextImpl,
-  normalizeRelPath,
-} = {}) => {
-  const normalize = (relPath) => {
+type ImplFn = (value: unknown) => unknown;
+type AsyncImplFn = (value: unknown) => Promise<unknown>;
+
+type CreateSdkHelpersArgs = {
+  assetUrlImpl?: ImplFn;
+  readTextImpl?: AsyncImplFn;
+  normalizeRelPath?: ImplFn;
+};
+
+export const createSdkHelpers = (
+  { assetUrlImpl, readTextImpl, normalizeRelPath }: CreateSdkHelpersArgs = {}
+) => {
+  const normalize = (relPath: unknown) => {
     if (typeof normalizeRelPath === "function") {
       try {
         return normalizeRelPath(relPath);
@@ -14,7 +21,7 @@ export const createSdkHelpers = ({
     return relPath;
   };
 
-  const assetUrl = (relPath) => {
+  const assetUrl = (relPath: unknown) => {
     const safe = normalize(relPath);
     if (safe == null) return null;
     if (typeof assetUrlImpl !== "function") return null;
@@ -25,7 +32,7 @@ export const createSdkHelpers = ({
     }
   };
 
-  const readText = async (relPath) => {
+  const readText = async (relPath: unknown) => {
     const safe = normalize(relPath);
     if (safe == null) return null;
     if (typeof readTextImpl !== "function") return null;
@@ -37,7 +44,7 @@ export const createSdkHelpers = ({
     }
   };
 
-  const loadJson = async (relPath) => {
+  const loadJson = async (relPath: unknown) => {
     try {
       const text = await readText(relPath);
       if (!text) return null;
@@ -49,3 +56,4 @@ export const createSdkHelpers = ({
 
   return { assetUrl, readText, loadJson };
 };
+

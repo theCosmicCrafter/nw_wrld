@@ -2,7 +2,7 @@ import { useCallback, useEffect } from "react";
 import {
   getRecordingForTrack,
   setRecordingForTrack,
-} from "../../../shared/json/recordingUtils.js";
+} from "../../../shared/json/recordingUtils.ts";
 import {
   normalizeNoteMatchMode,
   noteNumberToTriggerKey,
@@ -10,7 +10,7 @@ import {
   pitchClassToName,
   resolveChannelTrigger,
 } from "../../../shared/midi/midiUtils.js";
-import { getActiveSetTracks } from "../../../shared/utils/setUtils.js";
+import { getActiveSetTracks } from "../../../shared/utils/setUtils.ts";
 import { useIPCListener } from "./useIPC.js";
 
 export const useInputEvents = ({

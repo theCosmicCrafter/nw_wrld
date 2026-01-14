@@ -26,7 +26,7 @@ import {
   activeSetIdAtom,
 } from "../core/state.js";
 import { updateActiveSet, getMethodsByLayer } from "../core/utils.js";
-import { getActiveSetTracks } from "../../shared/utils/setUtils.js";
+import { getActiveSetTracks } from "../../shared/utils/setUtils.ts";
 import { getBaseMethodNames } from "../utils/moduleUtils.js";
 import { HELP_TEXT } from "../../shared/helpText.js";
 import { MethodCodeModal } from "./MethodCodeModal.jsx";

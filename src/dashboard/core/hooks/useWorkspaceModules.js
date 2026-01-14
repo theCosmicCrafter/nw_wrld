@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from "react";
-import { getProjectDir } from "../../../shared/utils/projectDir.js";
+import { getProjectDir } from "../../../shared/utils/projectDir.ts";
 import { updateUserData } from "../utils.js";
 import { useIPCListener } from "./useIPC.js";
 

@@ -19,11 +19,11 @@ import {
 } from "../../core/state.js";
 import { updateActiveSet } from "../../core/utils.js";
 import { TERMINAL_STYLES } from "../../core/constants.js";
-import { getActiveSetTracks } from "../../../shared/utils/setUtils.js";
+import { getActiveSetTracks } from "../../../shared/utils/setUtils.ts";
 import {
   getRecordingForTrack,
   getSequencerForTrack,
-} from "../../../shared/json/recordingUtils.js";
+} from "../../../shared/json/recordingUtils.ts";
 import {
   resolveTrackTrigger,
   resolveChannelTrigger,
