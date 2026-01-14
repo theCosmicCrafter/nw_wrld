@@ -1,6 +1,21 @@
 import * as Tone from "tone";
 
+type NwWrldBridge = {
+  app?: {
+    getKickMp3ArrayBuffer?: () => ArrayBuffer | null;
+  };
+};
+
 class SequencerAudio {
+  private channelNotes: string[];
+  private lastPlayTime: number;
+  private debounceMs: number;
+  private lastScheduledTimeMs: number | null;
+  private kickPlayer: Tone.Player | null;
+  private isInitializing: boolean;
+  private isInitialized: boolean;
+  private isToneStarted: boolean;
+
   constructor() {
     this.channelNotes = ["E2"];
     this.lastPlayTime = 0;
@@ -26,7 +41,7 @@ class SequencerAudio {
       }
 
       if (!this.kickPlayer) {
-        const bridge = globalThis.nwWrldBridge;
+        const bridge = globalThis.nwWrldBridge as NwWrldBridge | undefined;
         const arrayBuffer =
           bridge &&
           bridge.app &&
@@ -58,7 +73,7 @@ class SequencerAudio {
     }
   }
 
-  async playChannelBeep(channelNumber, time) {
+  async playChannelBeep(channelNumber: string | number, time?: number) {
     const hasScheduledTime = typeof time === "number" && Number.isFinite(time);
     if (hasScheduledTime) {
       const scheduledTimeMs = time * 1000;
@@ -86,7 +101,7 @@ class SequencerAudio {
       return;
     }
 
-    const numericChannel = parseInt(channelNumber);
+    const numericChannel = parseInt(String(channelNumber));
     if (isNaN(numericChannel) || numericChannel < 1) {
       console.warn(`Invalid channel number: ${channelNumber}`);
       return;
@@ -121,3 +136,4 @@ class SequencerAudio {
 }
 
 export default SequencerAudio;
+

@@ -21,8 +21,8 @@ import {
   saveAppStateSync,
 } from "../shared/json/appStateUtils.ts";
 import MidiPlayback from "../shared/midi/midiPlayback.ts";
-import SequencerPlayback from "../shared/sequencer/SequencerPlayback.js";
-import SequencerAudio from "../shared/audio/sequencerAudio.js";
+import SequencerPlayback from "../shared/sequencer/SequencerPlayback";
+import SequencerAudio from "../shared/audio/sequencerAudio";
 import { getActiveSetTracks } from "../shared/utils/setUtils.ts";
 import { Button } from "./components/Button.js";
 import { ModalHeader } from "./components/ModalHeader.js";

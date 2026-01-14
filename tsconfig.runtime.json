@@ -46,6 +46,7 @@
     "src/main/mainProcess/pathSafety.ts",
     "src/main/mainProcess/ipcBridge.ts",
     "src/main/mainProcess/sandbox.ts",
+    "src/main/mainProcess/entry.ts",
     "src/main/mainProcess/windows.ts",
     "src/main/mainProcess/workspace.ts",
     "src/main/mainProcess/protocols.ts",

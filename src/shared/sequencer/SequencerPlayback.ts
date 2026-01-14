@@ -1,6 +1,23 @@
 import * as Tone from "tone";
 
+type Pattern = Record<string, number[]>;
+type OnStepCallback = (
+  stepIndex: number,
+  channelsToTrigger: string[],
+  time: number,
+  runId: number
+) => void;
+
 class SequencerPlayback {
+  private isPlaying: boolean;
+  private currentStep: number;
+  private pattern: Pattern;
+  private bpm: number;
+  private onStepCallback: OnStepCallback | null;
+  private totalSteps: number;
+  private transportEventId: number | null;
+  private runId: number;
+
   constructor() {
     this.isPlaying = false;
     this.currentStep = 0;
@@ -12,12 +29,12 @@ class SequencerPlayback {
     this.runId = 0;
   }
 
-  load(pattern, bpm = 120) {
+  load(pattern: Pattern | null | undefined, bpm: number = 120) {
     this.pattern = pattern || {};
     this.bpm = bpm;
   }
 
-  setOnStepCallback(callback) {
+  setOnStepCallback(callback: OnStepCallback | null) {
     this.onStepCallback = callback;
   }
 
@@ -25,7 +42,7 @@ class SequencerPlayback {
     return this.runId;
   }
 
-  setBpm(bpm) {
+  setBpm(bpm: number) {
     this.bpm = bpm;
     if (this.isPlaying) Tone.Transport.bpm.value = this.bpm;
   }
@@ -56,13 +73,13 @@ class SequencerPlayback {
     Tone.Transport.start();
   }
 
-  tick(time, runId) {
+  private tick(time: number, runId: number) {
     if (!this.onStepCallback) return;
     if (!this.isPlaying) return;
     if (runId !== this.runId) return;
 
     const stepIndex = this.currentStep;
-    const channelsToTrigger = [];
+    const channelsToTrigger: string[] = [];
     Object.entries(this.pattern).forEach(([channelName, steps]) => {
       if (Array.isArray(steps) && steps.includes(stepIndex)) {
         channelsToTrigger.push(channelName);
@@ -96,3 +113,4 @@ class SequencerPlayback {
 }
 
 export default SequencerPlayback;
+
