@@ -1,4 +1,3 @@
-import React from "react";
 import { useSortable } from "@dnd-kit/sortable";
 
 export const SortableWrapper = ({ id, disabled = false, children }) => {

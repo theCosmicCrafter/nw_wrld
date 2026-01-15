@@ -1,4 +1,4 @@
-import React from "react";
+import { Children, cloneElement } from "react";
 
 export const Modal = ({
   isOpen,
@@ -31,7 +31,7 @@ export const Modal = ({
     }
   };
 
-  const childrenArray = React.Children.toArray(children);
+  const childrenArray = Children.toArray(children);
 
   const findComponent = (displayName) => {
     return childrenArray.findIndex((child) => {
@@ -82,7 +82,7 @@ export const Modal = ({
                       isBottomAligned ? "pb-0 pt-6" : "p-6 pb-0"
                     }`}
                   >
-                    {React.cloneElement(child, { isBottomAligned })}
+                    {cloneElement(child, { isBottomAligned })}
                   </div>
                 );
               }
@@ -94,7 +94,7 @@ export const Modal = ({
                       isBottomAligned ? "pb-4 pt-0" : "p-6 pt-0"
                     }`}
                   >
-                    {React.cloneElement(child, { isBottomAligned })}
+                    {cloneElement(child, { isBottomAligned })}
                   </div>
                 );
               }

@@ -1,5 +1,5 @@
 // Dashboard.tsx
-import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { createRoot } from "react-dom/client";
 import { useAtom } from "jotai";
 import { produce } from "immer";

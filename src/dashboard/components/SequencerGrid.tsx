@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { ChangeEventHandler, useState } from "react";
 import { NumberInput } from "./FormInputs";
 import { HelpIcon } from "./HelpIcon";
 import { HELP_TEXT } from "../../shared/helpText.ts";
@@ -12,7 +12,7 @@ type SequencerGridProps = {
   isPlaying: boolean;
   currentStep: number;
   onToggleStep: (channelName: string, stepIndex: number) => void;
-  onBpmChange: React.ChangeEventHandler<HTMLInputElement>;
+  onBpmChange: ChangeEventHandler<HTMLInputElement>;
 };
 
 export const SequencerGrid = ({

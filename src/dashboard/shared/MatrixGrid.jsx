@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { NumberInput } from "../components/FormInputs";
 
 export const MatrixGrid = ({ value, onChange }) => {

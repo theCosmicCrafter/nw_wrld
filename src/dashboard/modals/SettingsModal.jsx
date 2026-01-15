@@ -1,4 +1,4 @@
-import React from "react";
+import { memo, useState, useRef, useEffect, useCallback } from "react";
 import { Modal } from "../shared/Modal.jsx";
 import { ModalHeader } from "../components/ModalHeader";
 import { Button } from "../components/Button";
@@ -37,18 +37,18 @@ const normalizeHexColor = (value) => {
   return hex;
 };
 
-const DraftIntInput = React.memo(({ value, fallback, onCommit, ...props }) => {
-  const [draft, setDraft] = React.useState(null);
-  const [isFocused, setIsFocused] = React.useState(false);
-  const skipCommitRef = React.useRef(false);
+const DraftIntInput = memo(({ value, fallback, onCommit, ...props }) => {
+  const [draft, setDraft] = useState(null);
+  const [isFocused, setIsFocused] = useState(false);
+  const skipCommitRef = useRef(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isFocused) setDraft(null);
   }, [isFocused, value]);
 
   const displayed = draft !== null ? draft : String(value ?? "");
 
-  const commitIfValid = React.useCallback(
+  const commitIfValid = useCallback(
     (raw) => {
       const s = String(raw);
       const isIntermediate =
@@ -61,7 +61,7 @@ const DraftIntInput = React.memo(({ value, fallback, onCommit, ...props }) => {
     [onCommit]
   );
 
-  const commitOnBlur = React.useCallback(() => {
+  const commitOnBlur = useCallback(() => {
     if (draft === null) return;
     const s = String(draft);
     const isIntermediate =
@@ -114,23 +114,23 @@ const DraftIntInput = React.memo(({ value, fallback, onCommit, ...props }) => {
 
 const UserColors = ({ config, updateConfig }) => {
   const userColors = Array.isArray(config?.userColors) ? config.userColors : [];
-  const [draft, setDraft] = React.useState(
+  const [draft, setDraft] = useState(
     userColors[0] && isValidHexColor(userColors[0]) ? userColors[0] : "#ffffff"
   );
-  const [draftText, setDraftText] = React.useState(String(draft));
+  const [draftText, setDraftText] = useState(String(draft));
 
-  React.useEffect(() => {
+  useEffect(() => {
     setDraftText(String(draft));
   }, [draft]);
 
-  const addColor = React.useCallback(() => {
+  const addColor = useCallback(() => {
     const normalized = normalizeHexColor(draftText);
     if (!normalized) return;
     const next = Array.from(new Set([...userColors, normalized]));
     updateConfig({ userColors: next });
   }, [draftText, updateConfig, userColors]);
 
-  const removeColor = React.useCallback(
+  const removeColor = useCallback(
     (hex) => {
       const safe = String(hex || "").trim();
       if (!safe) return;

@@ -1,10 +1,10 @@
-import React, { useMemo, useCallback, useEffect, useRef, useState } from "react";
+import { ComponentType, memo, useMemo, useCallback, useEffect, useRef, useState } from "react";
 import { FaCode, FaDice, FaLock, FaPlay } from "react-icons/fa";
 import { TextInput, NumberInput, ColorInput, Select, Checkbox } from "./FormInputs";
 import { MatrixGrid } from "../shared/MatrixGrid.jsx";
 import { AssetOptionInput as AssetOptionInputRaw } from "./AssetOptionInput.jsx";
 
-const AssetOptionInput = AssetOptionInputRaw as unknown as React.ComponentType<any>;
+const AssetOptionInput = AssetOptionInputRaw as unknown as ComponentType<any>;
 
 const CUSTOM_VALUE = "__nw_wrld_custom__";
 
@@ -62,7 +62,7 @@ type MethodBlockProps = {
   onAddMissingOption?: ((methodName: string, optionName: string) => void) | null;
 };
 
-const DraftNumberInput = React.memo(
+const DraftNumberInput = memo(
   ({
     value,
     min,
@@ -159,7 +159,7 @@ const DraftNumberInput = React.memo(
   }
 );
 
-export const MethodBlock = React.memo(
+export const MethodBlock = memo(
   ({
     method,
     mode = "dashboard",

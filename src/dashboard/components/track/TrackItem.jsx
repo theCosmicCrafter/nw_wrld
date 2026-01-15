@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import { memo, useState, useEffect, useCallback, useRef } from "react";
 import { useAtom } from "jotai";
 import { remove } from "lodash";
 import { FaPlus } from "react-icons/fa";
@@ -23,7 +23,7 @@ import { Button } from "../Button";
 import { TrackDataModal } from "../../modals/TrackDataModal.jsx";
 import { ModuleSelector, SortableModuleItem } from "./ModuleComponents.jsx";
 
-export const TrackItem = React.memo(
+export const TrackItem = memo(
   ({
     track,
     trackIndex,

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { Select, TextInput } from "./FormInputs";
 
 const CUSTOM_VALUE = "__nw_wrld_custom__";
@@ -69,7 +69,7 @@ const normalizeExtSet = (extensions) => {
   return out;
 };
 
-export const AssetOptionInput = React.memo(
+export const AssetOptionInput = memo(
   ({
     kind = "file",
     baseDir = "",

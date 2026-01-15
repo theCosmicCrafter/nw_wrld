@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useMemo } from "react";
+import { memo, useRef, useEffect, useMemo } from "react";
 import { Button } from "../components/Button";
 import { HelpIcon } from "../components/HelpIcon";
 import { HELP_TEXT } from "../../shared/helpText.ts";
@@ -216,7 +216,7 @@ const renderColoredLog = (log) => {
   return <>{parts}</>;
 };
 
-const LogItem = React.memo(({ log, index }) => {
+const LogItem = memo(({ log, index }) => {
   return (
     <div className="flex flex-wrap gap-x-2 mb-1">{renderColoredLog(log)}</div>
   );
@@ -224,7 +224,7 @@ const LogItem = React.memo(({ log, index }) => {
 
 LogItem.displayName = "LogItem";
 
-export const DebugOverlayModal = React.memo(
+export const DebugOverlayModal = memo(
   ({ isOpen, onClose, debugLogs }) => {
     const logContainerRef = useRef(null);
     const scrollTimeoutRef = useRef(null);

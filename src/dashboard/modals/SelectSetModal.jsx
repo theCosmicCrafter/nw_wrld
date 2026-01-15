@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
 import { Modal } from "../shared/Modal.jsx";
 import { SortableWrapper } from "../shared/SortableWrapper.jsx";

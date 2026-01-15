@@ -1,4 +1,4 @@
-import React from "react";
+import { InputHTMLAttributes, CSSProperties, HTMLAttributes, ReactNode, SelectHTMLAttributes } from "react";
 import { TERMINAL_STYLES } from "../core/constants";
 
 export { TERMINAL_STYLES };
@@ -6,8 +6,8 @@ export { TERMINAL_STYLES };
 export const TextInput = ({
   style,
   ...props
-}: React.InputHTMLAttributes<HTMLInputElement> & {
-  style?: React.CSSProperties;
+}: InputHTMLAttributes<HTMLInputElement> & {
+  style?: CSSProperties;
 }) => {
   return (
     <input
@@ -32,8 +32,8 @@ export const NumberInput = ({
   min,
   max,
   ...props
-}: React.InputHTMLAttributes<HTMLInputElement> & {
-  style?: React.CSSProperties;
+}: InputHTMLAttributes<HTMLInputElement> & {
+  style?: CSSProperties;
   min?: string | number;
   max?: string | number;
 }) => {
@@ -62,9 +62,9 @@ export const Select = ({
   style,
   children,
   ...props
-}: React.SelectHTMLAttributes<HTMLSelectElement> & {
-  style?: React.CSSProperties;
-  children?: React.ReactNode;
+}: SelectHTMLAttributes<HTMLSelectElement> & {
+  style?: CSSProperties;
+  children?: ReactNode;
 }) => {
   return (
     <select
@@ -90,8 +90,8 @@ export const Checkbox = ({
   checked,
   defaultChecked,
   ...props
-}: React.InputHTMLAttributes<HTMLInputElement> & {
-  style?: React.CSSProperties;
+}: InputHTMLAttributes<HTMLInputElement> & {
+  style?: CSSProperties;
 }) => {
   return (
     <input
@@ -121,8 +121,8 @@ export const Checkbox = ({
 export const RadioButton = ({
   style,
   ...props
-}: React.InputHTMLAttributes<HTMLInputElement> & {
-  style?: React.CSSProperties;
+}: InputHTMLAttributes<HTMLInputElement> & {
+  style?: CSSProperties;
 }) => {
   return (
     <input
@@ -151,8 +151,8 @@ export const RadioButton = ({
 export const ColorInput = ({
   style,
   ...props
-}: React.InputHTMLAttributes<HTMLInputElement> & {
-  style?: React.CSSProperties;
+}: InputHTMLAttributes<HTMLInputElement> & {
+  style?: CSSProperties;
 }) => {
   return (
     <input
@@ -173,8 +173,8 @@ export const ColorInput = ({
 export const FileInput = ({
   style,
   ...props
-}: React.InputHTMLAttributes<HTMLInputElement> & {
-  style?: React.CSSProperties;
+}: InputHTMLAttributes<HTMLInputElement> & {
+  style?: CSSProperties;
 }) => {
   return (
     <input
@@ -198,9 +198,9 @@ export const Label = ({
   style,
   children,
   ...props
-}: React.HTMLAttributes<HTMLDivElement> & {
-  style?: React.CSSProperties;
-  children?: React.ReactNode;
+}: HTMLAttributes<HTMLDivElement> & {
+  style?: CSSProperties;
+  children?: ReactNode;
 }) => {
   return (
     <div

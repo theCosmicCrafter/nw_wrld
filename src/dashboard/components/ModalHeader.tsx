@@ -1,8 +1,8 @@
-import React from "react";
+import { ReactNode } from "react";
 import { Button } from "./Button";
 
 type ModalHeaderProps = {
-  title: React.ReactNode;
+  title: ReactNode;
   onClose: () => void;
   isBottomAligned?: boolean;
   showClose?: boolean;

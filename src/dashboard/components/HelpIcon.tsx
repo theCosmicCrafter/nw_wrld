@@ -1,9 +1,9 @@
-import React from "react";
+import { ReactNode } from "react";
 import { FaQuestionCircle } from "react-icons/fa";
 import { Tooltip } from "./Tooltip";
 
 type HelpIconProps = {
-  helpText: React.ReactNode;
+  helpText: ReactNode;
 };
 
 export const HelpIcon = ({ helpText }: HelpIconProps) => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { memo, useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useAtom } from "jotai";
 import * as d3 from "d3";
 import { SortableWrapper } from "../../shared/SortableWrapper.jsx";
@@ -26,7 +26,7 @@ import { FaPlus } from "react-icons/fa";
 import { FaExclamationTriangle } from "react-icons/fa";
 import { Tooltip } from "../Tooltip";
 
-export const ModuleSelector = React.memo(
+export const ModuleSelector = memo(
   ({
     trackIndex,
     predefinedModules,
@@ -102,7 +102,7 @@ const groupSequences = (sequences, threshold = 0.1) => {
   return grouped;
 };
 
-export const NoteSelector = React.memo(
+export const NoteSelector = memo(
   ({
     trackIndex,
     instanceId,
@@ -563,7 +563,7 @@ export const NoteSelector = React.memo(
   }
 );
 
-export const SortableModuleItem = React.memo(
+export const SortableModuleItem = memo(
   ({
     id,
     moduleInstance,

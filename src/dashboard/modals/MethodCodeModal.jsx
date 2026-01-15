@@ -1,14 +1,14 @@
-import React from "react";
+import { useState, useEffect } from "react";
 import { Modal } from "../shared/Modal.jsx";
 import { ModalHeader } from "../components/ModalHeader";
 import { getMethodCode } from "../core/utils";
 
 export const MethodCodeModal = ({ isOpen, onClose, moduleName, methodName }) => {
-  const [methodCode, setMethodCode] = React.useState(null);
-  const [filePath, setFilePath] = React.useState(null);
-  const [loading, setLoading] = React.useState(false);
+  const [methodCode, setMethodCode] = useState(null);
+  const [filePath, setFilePath] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isOpen && moduleName && methodName) {
       setLoading(true);
       try {

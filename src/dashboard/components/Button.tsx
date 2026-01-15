@@ -1,17 +1,17 @@
-import React from "react";
+import { MouseEventHandler, ReactNode, ElementType, ButtonHTMLAttributes } from "react";
 
 type ButtonStyleType = "primary" | "secondary";
 
 type ButtonOwnProps = {
-  onClick?: React.MouseEventHandler;
-  children?: React.ReactNode;
+  onClick?: MouseEventHandler;
+  children?: ReactNode;
   title?: string;
   className?: string;
-  as?: React.ElementType;
+  as?: ElementType;
   type?: ButtonStyleType;
-  icon?: React.ReactNode;
+  icon?: ReactNode;
   disabled?: boolean;
-  htmlType?: React.ButtonHTMLAttributes<HTMLButtonElement>["type"];
+  htmlType?: ButtonHTMLAttributes<HTMLButtonElement>["type"];
 };
 
 export const Button = ({
@@ -35,7 +35,7 @@ export const Button = ({
     ? "opacity-30 cursor-not-allowed"
     : "cursor-pointer";
 
-  const handleClick: React.MouseEventHandler = (e) => {
+  const handleClick: MouseEventHandler = (e) => {
     if (disabled) {
       e.preventDefault();
       e.stopPropagation();

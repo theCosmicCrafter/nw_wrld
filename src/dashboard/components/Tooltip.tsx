@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 
 type TooltipPosition = "top" | "bottom" | "left" | "right";
 
 type TooltipProps = {
-  children: React.ReactNode;
-  content: React.ReactNode;
+  children: ReactNode;
+  content: ReactNode;
   position?: TooltipPosition;
 };
 

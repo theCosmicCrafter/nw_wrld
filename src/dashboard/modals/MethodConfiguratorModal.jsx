@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { memo, Fragment, useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useAtom } from "jotai";
 import { remove } from "lodash";
 import { useIPCSend } from "../core/hooks/useIPC";
@@ -21,7 +21,7 @@ import { getBaseMethodNames } from "../utils/moduleUtils.ts";
 import { HELP_TEXT } from "../../shared/helpText.ts";
 import { MethodCodeModal } from "./MethodCodeModal.jsx";
 
-const SortableItem = React.memo(
+const SortableItem = memo(
   ({
     id,
     method,
@@ -723,7 +723,7 @@ export const MethodConfiguratorModal = ({
                   >
                     <div className="flex items-start overflow-x-auto pt-4">
                       {layer.configuredMethods.map((method, methodIndex) => (
-                        <React.Fragment key={method.name}>
+                        <Fragment key={method.name}>
                           <SortableItem
                             id={method.name}
                             method={method}
@@ -745,7 +745,7 @@ export const MethodConfiguratorModal = ({
                               <div className="w-full h-px bg-neutral-800" />
                             </div>
                           )}
-                        </React.Fragment>
+                        </Fragment>
                       ))}
                     </div>
                   </SortableList>

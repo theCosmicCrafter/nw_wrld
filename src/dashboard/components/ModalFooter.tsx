@@ -1,15 +1,15 @@
-import React from "react";
+import { ReactNode, Children } from "react";
 
 type ModalFooterJustify = "center" | "between" | "end";
 
 type ModalFooterProps = {
-  children?: React.ReactNode;
+  children?: ReactNode;
   isBottomAligned?: boolean;
   justify?: ModalFooterJustify;
 };
 
 export const ModalFooter = ({ children, isBottomAligned, justify }: ModalFooterProps) => {
-  const childCount = React.Children.count(children);
+  const childCount = Children.count(children);
   const defaultJustifyClass =
     childCount > 1 ? "justify-between" : "justify-end";
   const justifyClass =

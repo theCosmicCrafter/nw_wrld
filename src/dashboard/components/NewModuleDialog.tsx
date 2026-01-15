@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { ReactNode, useState } from "react";
 import { Button } from "./Button";
 import { ModalHeader } from "./ModalHeader";
 import { ModalFooter } from "./ModalFooter";
@@ -7,7 +7,7 @@ import { TextInput, Select, Label } from "./FormInputs";
 type ModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  children: React.ReactNode;
+  children: ReactNode;
   size?: "small" | "large";
 };
 
