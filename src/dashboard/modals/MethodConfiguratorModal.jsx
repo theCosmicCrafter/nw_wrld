@@ -11,7 +11,7 @@ import { ModalFooter } from "../components/ModalFooter";
 import { Button } from "../components/Button";
 import { Select } from "../components/FormInputs";
 import { HelpIcon } from "../components/HelpIcon";
-import { MethodBlock } from "../components/MethodBlock.js";
+import { MethodBlock } from "../components/MethodBlock";
 import { Tooltip } from "../components/Tooltip";
 import { FaExclamationTriangle } from "react-icons/fa";
 import { userDataAtom, selectedChannelAtom, activeSetIdAtom } from "../core/state.ts";

@@ -1,4 +1,4 @@
-// Dashboard.js
+// Dashboard.tsx
 import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { createRoot } from "react-dom/client";
 import { useAtom } from "jotai";
@@ -27,7 +27,7 @@ import { getActiveSetTracks } from "../shared/utils/setUtils.ts";
 import { Button } from "./components/Button";
 import { ModalHeader } from "./components/ModalHeader";
 import { ModalFooter } from "./components/ModalFooter";
-import { ModuleEditorModal } from "./components/ModuleEditorModal.js";
+import { ModuleEditorModal } from "./components/ModuleEditorModal";
 import { NewModuleDialog } from "./components/NewModuleDialog";
 import {
   loadUserData,

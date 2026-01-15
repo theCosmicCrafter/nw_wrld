@@ -18,9 +18,68 @@ import { AssetOptionInput } from "./AssetOptionInput.jsx";
 
 const CUSTOM_VALUE = "__nw_wrld_custom__";
 
+type MethodOptionDef = {
+  name: string;
+  type: string;
+  defaultVal?: unknown;
+  values?: string[];
+  min?: number;
+  max?: number;
+  assetBaseDir?: string;
+  assetExtensions?: string[];
+  allowCustom?: boolean;
+  allowRandomization?: boolean;
+};
+
+type ModuleMethodDef = {
+  name: string;
+  options?: MethodOptionDef[];
+};
+
+type MethodOptionValue = {
+  name: string;
+  value: unknown;
+  randomRange?: unknown;
+  randomValues?: unknown;
+  randomizeFromUserColors?: unknown;
+};
+
+type MethodValue = {
+  name: string;
+  options: MethodOptionValue[];
+};
+
+type MethodBlockProps = {
+  method: MethodValue;
+  mode?: "dashboard" | "editor";
+  moduleMethods?: ModuleMethodDef[];
+  moduleName?: string | null;
+  userColors?: string[];
+  dragHandleProps?: unknown;
+  onRemove?: ((methodName: string) => void) | null;
+  onShowCode?: ((methodName: string) => void) | null;
+  onTrigger?: ((methodName: string, options: Record<string, unknown>) => void) | null;
+  onOptionChange?: ((methodName: string, optionName: string, value: unknown) => void) | null;
+  onToggleRandom?: ((methodName: string, optionName: string) => void) | null;
+  onRandomRangeChange?: ((methodName: string, optionName: string, range: unknown) => void) | null;
+  onAddMissingOption?: ((methodName: string, optionName: string) => void) | null;
+};
+
 const DraftNumberInput = React.memo(
-  ({ value, min, max, fallback, onCommit }) => {
-    const [draft, setDraft] = useState(null);
+  ({
+    value,
+    min,
+    max,
+    fallback,
+    onCommit,
+  }: {
+    value: unknown;
+    min?: number;
+    max?: number;
+    fallback: number;
+    onCommit: (next: number) => void;
+  }) => {
+    const [draft, setDraft] = useState<string | null>(null);
     const [isFocused, setIsFocused] = useState(false);
     const skipCommitRef = useRef(false);
 
@@ -121,7 +180,7 @@ export const MethodBlock = React.memo(
     onToggleRandom = null,
     onRandomRangeChange = null,
     onAddMissingOption = null,
-  }) => {
+  }: MethodBlockProps) => {
     const [isFlashing, setIsFlashing] = useState(false);
     const [customColorOpenByOption, setCustomColorOpenByOption] = useState({});
 

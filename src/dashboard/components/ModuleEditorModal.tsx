@@ -9,12 +9,46 @@ import {
   Checkbox,
   TERMINAL_STYLES,
 } from "./FormInputs";
-import { getBaseMethodNames } from "../utils/moduleUtils.ts";
-import { MethodBlock } from "./MethodBlock.js";
+import { getBaseMethodNames } from "../utils/moduleUtils";
+import { MethodBlock } from "./MethodBlock";
 import { HelpIcon } from "./HelpIcon";
-import { HELP_TEXT } from "../../shared/helpText.ts";
+import { HELP_TEXT } from "../../shared/helpText";
 
 const getBridge = () => globalThis.nwWrldBridge;
+
+type ModuleMethodOption = {
+  name: string;
+  defaultVal?: unknown;
+};
+
+type ModuleMethod = {
+  name: string;
+  executeOnLoad?: boolean;
+  options?: ModuleMethodOption[] | null;
+};
+
+type PredefinedModule = {
+  id?: string;
+  name?: string;
+  methods?: ModuleMethod[];
+};
+
+type TemplateType = "basic" | "threejs" | "p5js";
+
+type MethodWithValues = {
+  name: string;
+  options: { name: string; value: unknown }[];
+};
+
+type ModuleEditorModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  moduleName: string | null;
+  templateType?: TemplateType | null;
+  onModuleSaved?: ((moduleName: string) => void) | null;
+  predefinedModules?: PredefinedModule[];
+  workspacePath?: string | null;
+};
 
 const TEMPLATES = {
   basic: (moduleName) => `/*
@@ -213,21 +247,23 @@ export const ModuleEditorModal = ({
   onModuleSaved,
   predefinedModules = [],
   workspacePath = null,
-}) => {
+}: ModuleEditorModalProps) => {
   const [code, setCode] = useState("");
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [methodOptions, setMethodOptions] = useState({});
+  const [methodOptions, setMethodOptions] = useState<
+    Record<string, Record<string, unknown>>
+  >({});
 
-  const moduleData = useMemo(() => {
+  const moduleData = useMemo<PredefinedModule | null>(() => {
     if (!moduleName) return null;
     return predefinedModules.find(
       (m) => m.id === moduleName || m.name === moduleName
     );
   }, [predefinedModules, moduleName]);
 
-  const filePath = useMemo(() => {
+  const filePath = useMemo<string | null>(() => {
     if (!moduleName) return null;
     if (workspacePath) {
       return `${workspacePath}/modules/${moduleName}.js`;
@@ -457,7 +493,8 @@ export const ModuleEditorModal = ({
           }
         }
       } catch (err) {
-        setError(`Failed to create module: ${err.message}`);
+        const msg = err instanceof Error ? err.message : String(err);
+        setError(`Failed to create module: ${msg}`);
       }
     } else if (moduleName) {
       (async () => {
@@ -477,7 +514,8 @@ export const ModuleEditorModal = ({
           setCode(String(fileContent));
           setIsLoading(false);
         } catch (err) {
-          setError(`Failed to load module: ${err.message}`);
+          const msg = err instanceof Error ? err.message : String(err);
+          setError(`Failed to load module: ${msg}`);
           setIsLoading(false);
         }
       })();
@@ -494,7 +532,8 @@ export const ModuleEditorModal = ({
     if (!moduleName || !moduleData) return;
 
     try {
-      const executeOnLoadMethods = moduleData.methods
+      const methods = moduleData.methods || [];
+      const executeOnLoadMethods = methods
         .filter((m) => m.executeOnLoad)
         .map((m) => ({
           name: m.name,
@@ -507,7 +546,7 @@ export const ModuleEditorModal = ({
               : null,
         }));
 
-      const showMethod = moduleData.methods.find((m) => m.name === "show");
+      const showMethod = methods.find((m) => m.name === "show");
       const finalConstructorMethods = [...executeOnLoadMethods];
 
       if (
@@ -549,8 +588,8 @@ export const ModuleEditorModal = ({
     bridge?.messaging?.sendToProjector?.("clear-preview", {});
   };
 
-  const handleMethodTrigger = (method) => {
-    const params = {};
+  const handleMethodTrigger = (method: MethodWithValues) => {
+    const params: Record<string, unknown> = {};
     method.options.forEach((opt) => {
       params[opt.name] = opt.value;
     });
@@ -563,7 +602,8 @@ export const ModuleEditorModal = ({
     });
   };
 
-  const handleOptionChange = useCallback((methodName, optionName, value) => {
+  const handleOptionChange = useCallback(
+    (methodName: string, optionName: string, value: unknown) => {
     setMethodOptions((prev) => ({
       ...prev,
       [methodName]: {
@@ -571,7 +611,9 @@ export const ModuleEditorModal = ({
         [optionName]: value,
       },
     }));
-  }, []);
+    },
+    []
+  );
 
   const handleClose = () => {
     clearPreview();
