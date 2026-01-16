@@ -2,15 +2,18 @@ import * as THREE from "three";
 import BaseThreeJsModule from "../helpers/threeBase.js";
 
 export class ThreeTemplate extends BaseThreeJsModule {
-  static name = "ThreeTemplate";
+  static title = "ThreeTemplate";
   static category = "primary";
 
   static methods = [...BaseThreeJsModule.methods];
 
+  customGroup: THREE.Group | null;
+  customObjects: Array<THREE.Mesh<any, any>>;
+
   constructor(container) {
     super(container);
 
-    this.name = ThreeTemplate.name;
+    this.name = ThreeTemplate.title;
     this.customGroup = new THREE.Group();
     this.customObjects = [];
     this.primary = this.primary.bind(this);

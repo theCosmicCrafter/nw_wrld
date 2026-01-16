@@ -9,8 +9,8 @@ export const recordingDataAtom = atom<Record<string, unknown>>({});
 export const activeTrackIdAtom = atom<string | null>(null);
 export const activeSetIdAtom = atom<string | null>(null);
 export const selectedChannelAtom = atom<unknown>(null);
-export const flashingChannelsAtom = atom<Set<string>>(new Set());
-export const flashingConstructorsAtom = atom<Set<string>>(new Set());
+export const flashingChannelsAtom = atom<Set<string>>(new Set<string>());
+export const flashingConstructorsAtom = atom<Set<string>>(new Set<string>());
 export const recordingStateAtom = atom<Record<string, { startTime: number; isRecording: boolean }>>(
   {}
 );

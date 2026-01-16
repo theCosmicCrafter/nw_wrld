@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { NumberInput } from "./FormInputs";
 import { HelpIcon } from "./HelpIcon";
-import { HELP_TEXT } from "../../shared/helpText.ts";
+import { HELP_TEXT } from "../../shared/helpText";
 
 type TrackChannel = string | { name: string };
 

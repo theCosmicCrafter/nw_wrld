@@ -4,17 +4,17 @@ import * as THREE from "three";
 import p5 from "p5";
 import * as d3 from "d3";
 import { Noise } from "noisejs";
-import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
-import { PLYLoader } from "three/addons/loaders/PLYLoader.js";
-import { PCDLoader } from "three/addons/loaders/PCDLoader.js";
-import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import { STLLoader } from "three/addons/loaders/STLLoader.js";
-import { parseNwWrldDocblockMetadata } from "../shared/nwWrldDocblock.ts";
+import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
+import { PLYLoader } from "three/examples/jsm/loaders/PLYLoader.js";
+import { PCDLoader } from "three/examples/jsm/loaders/PCDLoader.js";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { STLLoader } from "three/examples/jsm/loaders/STLLoader.js";
+import { parseNwWrldDocblockMetadata } from "../shared/nwWrldDocblock";
 import {
   buildMethodOptions,
   parseMatrixOptions,
-} from "../shared/utils/methodOptions.ts";
-import { createSdkHelpers } from "../shared/utils/sdkHelpers.ts";
+} from "../shared/utils/methodOptions";
+import { createSdkHelpers } from "../shared/utils/sdkHelpers";
 import {
   buildWorkspaceImportPreamble,
   ensureTrailingSlash,
@@ -32,6 +32,8 @@ if (!globalThis.PCDLoader) globalThis.PCDLoader = PCDLoader;
 if (!globalThis.GLTFLoader) globalThis.GLTFLoader = GLTFLoader;
 if (!globalThis.STLLoader) globalThis.STLLoader = STLLoader;
 
+const MODULE_METADATA_MAX_BYTES = 16 * 1024;
+
 const TOKEN =
   getTokenFromLocationHash(window?.location?.hash) ||
   (globalThis as typeof globalThis & { __NW_WRLD_SANDBOX_TOKEN__?: unknown })
@@ -42,7 +44,7 @@ const injectWorkspaceModuleImports = (moduleId, sourceText) => {
   if (typeof parseNwWrldDocblockMetadata !== "function") {
     throw new Error(`[Sandbox] Docblock parser is unavailable.`);
   }
-  const meta = parseNwWrldDocblockMetadata(sourceText);
+  const meta = parseNwWrldDocblockMetadata(sourceText, MODULE_METADATA_MAX_BYTES);
   const preamble = buildWorkspaceImportPreamble(moduleId, meta?.imports);
 
   const text = String(sourceText || "");
@@ -118,16 +120,27 @@ const rpcRequest = (type, props) =>
     }, 3000);
   });
 
+type NwWrldSdk = {
+  ModuleBase: typeof ModuleBase;
+  BaseThreeJsModule: typeof BaseThreeJsModule;
+  assetUrl?: (relPath: unknown) => unknown;
+  readText?: (relPath: unknown) => Promise<unknown>;
+  loadJson?: (relPath: unknown) => Promise<unknown>;
+  listAssets?: (relDir: unknown) => Promise<string[]>;
+};
+
 const createSdk = () => {
-  const sdk = { ModuleBase, BaseThreeJsModule };
+  const sdk: NwWrldSdk = { ModuleBase, BaseThreeJsModule };
 
   const { assetUrl, readText, loadJson } = createSdkHelpers({
     normalizeRelPath: safeAssetRelPath,
     assetUrlImpl: (safeRelPath) => {
       if (!assetsBaseUrl) return null;
+      const rel = typeof safeRelPath === "string" ? safeRelPath : null;
+      if (!rel) return null;
       try {
         const base = ensureTrailingSlash(assetsBaseUrl);
-        return new URL(safeRelPath, base).href;
+        return new URL(rel, base).href;
       } catch {
         return null;
       }
@@ -136,7 +149,10 @@ const createSdk = () => {
       const res = await rpcRequest("sdk:readAssetText", {
         relPath: safeRelPath,
       });
-      return typeof res?.text === "string" ? res.text : null;
+      if (!res || typeof res !== "object") return null;
+      if (!("text" in res)) return null;
+      const text = (res as { text?: unknown }).text;
+      return typeof text === "string" ? text : null;
     },
   });
 
@@ -148,8 +164,12 @@ const createSdk = () => {
     if (!safe) return [];
     try {
       const res = await rpcRequest("sdk:listAssets", { relDir: safe });
-      const entries = Array.isArray(res?.entries) ? res.entries : [];
-      return entries.filter((e) => typeof e === "string" && e.trim().length > 0);
+      const entries =
+        res && typeof res === "object" && "entries" in res
+          ? (res as { entries?: unknown }).entries
+          : [];
+      const list = Array.isArray(entries) ? entries : [];
+      return list.filter((e) => typeof e === "string" && e.trim().length > 0);
     } catch {
       return [];
     }
